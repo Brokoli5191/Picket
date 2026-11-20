@@ -56,11 +56,16 @@ anonymise() { if [[ -s "$anon_script" ]]; then sed -E -f "$anon_script"; else ca
 filter_default() { redact | anonymise; }
 filter_network() { redact_network | anonymise; }
 
-# capture <file-name> <filter> <argv...>
+# capture <filter> <argv...>
+# The file name is the argv joined with "_" ("/" becomes "%"), exactly what the tests' FixtureExecutor
+# looks up, so a recorded directory can drive the collectors unchanged.
 capture() {
-  local name="$1" filter="$2"
-  shift 2
-  local started rc
+  local filter="$1"
+  shift
+  local name started rc
+  name="$(printf '%s_' "$@")"
+  name="${name%_}"
+  name="${name//\//%}"
   started=$(date +%s)
   dev_run "$raw/$name.out" "$raw/$name.err" "$@"
   rc=$?
@@ -70,7 +75,7 @@ capture() {
   fi
   printf '%s\t%s\t%s\t%s\t%ss\n' "$name" "$*" "$rc" "$(wc -c < "$out/$name.txt" | tr -d ' ')" \
     "$(($(date +%s) - started))" >> "$out/INDEX.tsv"
-  printf '  %-58s exit %-3s %s bytes\n' "$name" "$rc" "$(wc -c < "$out/$name.txt" | tr -d ' ')" >&2
+  printf '  %-62s exit %-3s %s bytes\n' "$name" "$rc" "$(wc -c < "$out/$name.txt" | tr -d ' ')" >&2
 }
 
 first_pid() { "$ADB" shell -T pidof "$1" 2> /dev/null | tr -d '\r' | awk '{print $1}'; }
@@ -109,57 +114,58 @@ for pid in "${pids[@]}"; do
 done
 "$ADB" exec-out ls /proc 2> /dev/null | grep -c '^[0-9]' > "$out/proc/process-count.txt"
 
-# --- processes, services, memory -------------------------------------------------------------------
+# --- processes, services, memory (same argv as ReadCommands in :core) -------------------------
 info "processes and services"
-capture dumpsys_activity_services filter_default dumpsys activity services
-capture dumpsys_activity_lru filter_default dumpsys activity lru
-capture dumpsys_activity_oom filter_default dumpsys activity oom
-sysui_pid="$(first_pid com.android.systemui)"
-[[ -n "$sysui_pid" ]] && capture "dumpsys_meminfo_--checkin_systemui" filter_default dumpsys meminfo --checkin "$sysui_pid"
-capture dumpsys_package_com.android.systemui filter_default dumpsys package com.android.systemui
-capture cmd_appops_get_com.android.systemui filter_default cmd appops get com.android.systemui
-capture pm_list_packages_-s_-U filter_default pm list packages -s -U
-capture resolve_home filter_default cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME
+U=0
+SAMPLE_PKG=com.android.systemui
+capture filter_default dumpsys activity services
+capture filter_default dumpsys activity services "$SAMPLE_PKG"
+capture filter_default dumpsys activity lru
+capture filter_default dumpsys activity oom
+sysui_pid="$(first_pid "$SAMPLE_PKG")"
+[[ -n "$sysui_pid" ]] && capture filter_default dumpsys meminfo --checkin "$sysui_pid"
+capture filter_default dumpsys package "$SAMPLE_PKG"
+capture filter_default cmd appops get --user "$U" "$SAMPLE_PKG"
+capture filter_default am get-standby-bucket --user "$U" "$SAMPLE_PKG"
+capture filter_default pm list packages -s -U
+capture filter_default cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME
 
-# --- watchers ----------------------------------------------------------------------------------------
+# --- watchers ------------------------------------------------------------------------------------------
 info "watchers"
 for key in enabled_notification_listeners enabled_notification_policy_access_packages \
   enabled_accessibility_services accessibility_enabled enabled_input_methods default_input_method \
-  always_on_vpn_app always_on_vpn_lockdown; do
-  capture "settings_get_secure_$key" filter_default settings get secure "$key"
+  always_on_vpn_app; do
+  capture filter_default settings get secure "$key"
 done
-capture dumpsys_notification filter_default dumpsys notification
-capture dumpsys_accessibility filter_default dumpsys accessibility
-capture dumpsys_device_policy filter_default dumpsys device_policy
-capture ime_list_-s filter_default ime list -s
-capture ime_list_-a filter_default ime list -a
-capture cmd_appops_query-op_GET_USAGE_STATS_allow filter_default cmd appops query-op GET_USAGE_STATS allow
-capture cmd_appops_query-op_SYSTEM_ALERT_WINDOW_allow filter_default cmd appops query-op SYSTEM_ALERT_WINDOW allow
+capture filter_default dumpsys notification
+capture filter_default dumpsys accessibility
+capture filter_default dumpsys device_policy
+capture filter_default ime list -s
+capture filter_default cmd appops query-op GET_USAGE_STATS allow
+capture filter_default cmd appops query-op SYSTEM_ALERT_WINDOW allow
 for role in SMS DIALER ASSISTANT BROWSER HOME; do
-  capture "cmd_role_get-role-holders_$role" filter_default cmd role get-role-holders "android.app.role.$role"
+  capture filter_default cmd role get-role-holders --user "$U" "android.app.role.$role"
 done
-capture dumpsys_connectivity filter_network dumpsys connectivity
-capture dumpsys_vpn_management filter_network dumpsys vpn_management
+capture filter_network dumpsys vpn_management
 
-# --- wakeups ----------------------------------------------------------------------------------------
+# --- wakeups ----------------------------------------------------------------------------------------------
 info "wakeups (batterystats can take a while)"
-capture dumpsys_alarm filter_default dumpsys alarm
-capture dumpsys_jobscheduler filter_default dumpsys jobscheduler
-capture dumpsys_power filter_default dumpsys power
-capture "dumpsys_batterystats_--checkin" filter_default dumpsys batterystats --checkin
-capture am_get-standby-buckets filter_default am get-standby-buckets
-capture am_get-standby-bucket_com.android.systemui filter_default am get-standby-bucket com.android.systemui
-capture cmd_deviceidle_whitelist filter_default cmd deviceidle whitelist
+capture filter_default dumpsys alarm
+capture filter_default dumpsys jobscheduler
+capture filter_default dumpsys power
+capture filter_default dumpsys batterystats -c android
+capture filter_default am get-standby-bucket
+capture filter_default cmd deviceidle whitelist
 
 # --- help texts (document the command syntax this build accepts) --------------------------------------
 info "command help texts"
-capture help_am filter_default am help
-capture help_cmd_appops filter_default cmd appops help
-capture help_cmd_notification filter_default cmd notification help
-capture help_cmd_role filter_default cmd role help
-capture help_cmd_deviceidle filter_default cmd deviceidle help
-capture help_pm filter_default pm help
-capture help_dpm filter_default dpm help
+capture filter_default am help
+capture filter_default cmd appops help
+capture filter_default cmd notification help
+capture filter_default cmd role help
+capture filter_default cmd deviceidle help
+capture filter_default pm help
+capture filter_default dpm help
 
 cat << EOF >&2
 
