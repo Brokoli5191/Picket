@@ -9,5 +9,6 @@ class PicketApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
+        container.privilegedClient.start()
     }
 }
