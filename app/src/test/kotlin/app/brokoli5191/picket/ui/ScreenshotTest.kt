@@ -2,8 +2,10 @@ package app.brokoli5191.picket.ui
 
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.test.hasScrollToKeyAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performScrollToKey
 import app.brokoli5191.picket.core.model.AppDetail
 import app.brokoli5191.picket.core.model.AppOpEntry
 import app.brokoli5191.picket.core.model.AppWakeups
@@ -21,15 +23,20 @@ import app.brokoli5191.picket.core.process.Importance
 import app.brokoli5191.picket.core.process.ProcessKey
 import app.brokoli5191.picket.core.process.ProcessRow
 import app.brokoli5191.picket.data.AppInfo
+import app.brokoli5191.picket.data.journal.JournalEntry
 import app.brokoli5191.picket.data.settings.AppSettings
 import app.brokoli5191.picket.data.settings.AppearanceSettings
 import app.brokoli5191.picket.data.settings.ContrastPref
 import app.brokoli5191.picket.data.settings.MotionPref
 import app.brokoli5191.picket.data.settings.ThemeMode
 import app.brokoli5191.picket.privileged.client.PrivilegedState
+import app.brokoli5191.picket.ui.actions.actionOptionsFor
 import app.brokoli5191.picket.ui.connection.ConnectionScreen
 import app.brokoli5191.picket.ui.detail.AppDetailScreen
 import app.brokoli5191.picket.ui.detail.AppDetailUiState
+import app.brokoli5191.picket.ui.detail.actionItems
+import app.brokoli5191.picket.ui.journal.JournalRow
+import app.brokoli5191.picket.ui.journal.JournalScreen
 import app.brokoli5191.picket.ui.processes.ProcessesScreen
 import app.brokoli5191.picket.ui.processes.ProcessesUiState
 import app.brokoli5191.picket.ui.settings.AppearanceScreen
@@ -51,6 +58,7 @@ import org.junit.runner.RunWith
 import org.robolectric.ParameterizedRobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import java.util.TimeZone
 
 /** Every main screen, rendered from fake data, in light, dark, high contrast and pure black. */
 @RunWith(ParameterizedRobolectricTestRunner::class)
@@ -107,6 +115,41 @@ class ScreenshotTest(
 
     @Test
     fun appDetail() = capture("app-detail") { AppDetailScreen(SampleData.detail, onBack = {}, onRefresh = {}) }
+
+    @Test
+    fun appDetailActions() {
+        compose.setContent {
+            PicketTheme(variant.appearance) {
+                Surface {
+                    AppDetailScreen(SampleData.detail, onBack = {}, onRefresh = {}) {
+                        actionItems(
+                            actionOptionsFor(SampleData.detail),
+                            permissionsOpen = false,
+                            onPermissionsOpen = {},
+                            onSelect = {},
+                        )
+                    }
+                }
+            }
+        }
+        compose.onNode(hasScrollToKeyAction()).performScrollToKey("actions-header")
+        compose.onRoot().captureRoboImage("app-detail-actions-${variant.suffix}.png")
+    }
+
+    @Test
+    fun journal() {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+        capture("journal") {
+            JournalScreen(
+                SampleData.journal,
+                sessionId = "session",
+                onUndo = {},
+                onUndoSession = {},
+                onExport = {},
+                onBack = {},
+            )
+        }
+    }
 
     @Test
     fun settings() =
@@ -413,6 +456,18 @@ object SampleData {
             ) {
             },
             SettingsLink(
+                app.brokoli5191.picket.R.string.settings_journal,
+                app.brokoli5191.picket.R.string.settings_journal_summary,
+                app.brokoli5191.picket.R.drawable.ic_history,
+            ) {
+            },
+            SettingsLink(
+                app.brokoli5191.picket.R.string.settings_protected,
+                app.brokoli5191.picket.R.string.settings_protected_summary,
+                app.brokoli5191.picket.R.drawable.ic_shield,
+            ) {
+            },
+            SettingsLink(
                 app.brokoli5191.picket.R.string.settings_how_it_works,
                 app.brokoli5191.picket.R.string.settings_how_it_works_summary,
                 app.brokoli5191.picket.R.drawable.ic_help,
@@ -424,5 +479,110 @@ object SampleData {
                 app.brokoli5191.picket.R.drawable.ic_code,
             ) {
             },
+        )
+
+    private const val BASE_TIME = 1_795_000_000_000L
+
+    private fun entry(
+        id: Long,
+        minutesAgo: Int,
+        argv: List<String>,
+        previous: String?,
+        inverse: Boolean,
+        success: Boolean = true,
+        undoneById: Long? = null,
+        undoOfId: Long? = null,
+        note: String? = null,
+    ) = JournalEntry(
+        id = id,
+        sessionId = "session",
+        timestampMs = BASE_TIME - minutesAgo * 60_000L,
+        packageName = argv.first { it.startsWith("com.") }.substringBefore('/'),
+        actionJson = "{}",
+        argv = argv,
+        command = argv.joinToString(" "),
+        risk = "LOW",
+        previousState = previous,
+        inverseJson = if (inverse) "{}" else null,
+        success = success,
+        exitCode = if (success) 0 else 255,
+        stdout = "",
+        stderr = "",
+        note = note,
+        undoOfId = undoOfId,
+        undoneById = undoneById,
+    )
+
+    val journal =
+        listOf(
+            JournalRow(
+                entry(
+                    4,
+                    2,
+                    listOf(
+                        "/system/bin/cmd",
+                        "notification",
+                        "disallow_listener",
+                        "com.example.chat/.NotificationReader",
+                        "0",
+                    ),
+                    previous = "allowed",
+                    inverse = true,
+                ),
+                undoCommand = "/system/bin/cmd notification allow_listener com.example.chat/.NotificationReader 0",
+                restricted = true,
+            ),
+            JournalRow(
+                entry(
+                    3,
+                    9,
+                    listOf(
+                        "/system/bin/cmd",
+                        "appops",
+                        "set",
+                        "--user",
+                        "0",
+                        "com.example.chat",
+                        "RUN_ANY_IN_BACKGROUND",
+                        "ignore",
+                    ),
+                    previous = "allow",
+                    inverse = true,
+                ),
+                undoCommand = "/system/bin/cmd appops set --user 0 com.example.chat RUN_ANY_IN_BACKGROUND allow",
+                restricted = false,
+            ),
+            JournalRow(
+                entry(
+                    2,
+                    15,
+                    listOf(
+                        "/system/bin/cmd",
+                        "activity",
+                        "stop-service",
+                        "--user",
+                        "0",
+                        "-n",
+                        "com.example.chat/.sync.ChatSyncService",
+                    ),
+                    previous = null,
+                    inverse = false,
+                    success = false,
+                    note = "Service is bound by another app and keeps running",
+                ),
+                undoCommand = null,
+                restricted = false,
+            ),
+            JournalRow(
+                entry(
+                    1,
+                    31,
+                    listOf("/system/bin/cmd", "activity", "force-stop", "--user", "0", "com.example.chat"),
+                    null,
+                    inverse = false,
+                ),
+                undoCommand = null,
+                restricted = false,
+            ),
         )
 }

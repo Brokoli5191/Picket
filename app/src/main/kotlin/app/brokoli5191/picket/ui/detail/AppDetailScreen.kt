@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -45,6 +46,9 @@ fun AppDetailScreen(
     onBack: (() -> Unit)?,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Extra top bar buttons, before refresh (force stop). */
+    topBarActions: @Composable RowScope.() -> Unit = {},
+    /** Action rows, after all information so that the facts come first. */
     actions: LazyListScope.() -> Unit = {},
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -72,6 +76,7 @@ fun AppDetailScreen(
                     }
                 },
                 actions = {
+                    topBarActions()
                     IconButton(onClick = onRefresh) {
                         Icon(
                             painterResource(R.drawable.ic_restart_alt),
@@ -91,8 +96,6 @@ fun AppDetailScreen(
             state.errors.forEach { message ->
                 item { NoticeCard(stringResource(R.string.error_title), message, error = true) }
             }
-
-            actions()
 
             if (state.watchers.isNotEmpty()) {
                 item(key = "watchers") { SectionHeader(stringResource(R.string.detail_watchers)) }
@@ -202,6 +205,8 @@ fun AppDetailScreen(
                     )
                 }
             }
+
+            actions()
         }
     }
 }

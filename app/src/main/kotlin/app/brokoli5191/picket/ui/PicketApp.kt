@@ -29,16 +29,20 @@ import app.brokoli5191.picket.core.process.GroupKey
 import app.brokoli5191.picket.data.settings.AppSettings
 import app.brokoli5191.picket.privileged.client.PrivilegedState
 import app.brokoli5191.picket.ui.connection.ConnectionScreen
-import app.brokoli5191.picket.ui.detail.AppDetailScreen
+import app.brokoli5191.picket.ui.detail.AppDetailEntry
 import app.brokoli5191.picket.ui.detail.AppDetailViewModel
 import app.brokoli5191.picket.ui.expressive.detailPaneMetadata
 import app.brokoli5191.picket.ui.expressive.listPaneMetadata
 import app.brokoli5191.picket.ui.expressive.rememberPicketSceneStrategy
+import app.brokoli5191.picket.ui.journal.JournalDestination
+import app.brokoli5191.picket.ui.journal.JournalViewModel
 import app.brokoli5191.picket.ui.navigation.AppDetailRoute
 import app.brokoli5191.picket.ui.navigation.AppearanceRoute
 import app.brokoli5191.picket.ui.navigation.HowItWorksRoute
+import app.brokoli5191.picket.ui.navigation.JournalRoute
 import app.brokoli5191.picket.ui.navigation.LicensesRoute
 import app.brokoli5191.picket.ui.navigation.ProcessesRoute
+import app.brokoli5191.picket.ui.navigation.ProtectedRoute
 import app.brokoli5191.picket.ui.navigation.SettingsRoute
 import app.brokoli5191.picket.ui.navigation.TopLevel
 import app.brokoli5191.picket.ui.navigation.WakeupsRoute
@@ -48,6 +52,7 @@ import app.brokoli5191.picket.ui.processes.ProcessesViewModel
 import app.brokoli5191.picket.ui.settings.AppearanceScreen
 import app.brokoli5191.picket.ui.settings.HowItWorksScreen
 import app.brokoli5191.picket.ui.settings.LicensesScreen
+import app.brokoli5191.picket.ui.settings.ProtectedDestination
 import app.brokoli5191.picket.ui.settings.SettingsLink
 import app.brokoli5191.picket.ui.settings.SettingsScreen
 import app.brokoli5191.picket.ui.theme.PicketTheme
@@ -123,12 +128,7 @@ fun PicketApp(onOpenShizuku: () -> Unit) {
                             Privileged(onOpenShizuku) {
                                 val vm: AppDetailViewModel =
                                     viewModel(factory = AppViewModels.detailFactory(container, route))
-                                val state by vm.state.collectAsStateWithLifecycle()
-                                AppDetailScreen(
-                                    state = state,
-                                    onBack = { backStack.remove(route) },
-                                    onRefresh = vm::refresh,
-                                )
+                                AppDetailEntry(vm, onBack = { backStack.remove(route) })
                             }
                         }
                         entry<WatchersRoute>(metadata = listPaneMetadata()) {
@@ -169,6 +169,12 @@ fun PicketApp(onOpenShizuku: () -> Unit) {
                                 onBack = { backStack.remove(AppearanceRoute) },
                             )
                         }
+                        entry<JournalRoute> {
+                            // Readable and exportable without the service; undo reports if it is not connected.
+                            val vm: JournalViewModel = viewModel(factory = AppViewModels.factory(container))
+                            JournalDestination(vm, onBack = { backStack.remove(JournalRoute) })
+                        }
+                        entry<ProtectedRoute> { ProtectedDestination(onBack = { backStack.remove(ProtectedRoute) }) }
                         entry<HowItWorksRoute> { HowItWorksScreen(onBack = { backStack.remove(HowItWorksRoute) }) }
                         entry<LicensesRoute> { LicensesScreen(onBack = { backStack.remove(LicensesRoute) }) }
                     },
@@ -227,6 +233,12 @@ private fun SettingsEntry(
         listOf(
             SettingsLink(R.string.settings_appearance, R.string.settings_appearance_summary, R.drawable.ic_palette) {
                 navigate(AppearanceRoute)
+            },
+            SettingsLink(R.string.settings_journal, R.string.settings_journal_summary, R.drawable.ic_history) {
+                navigate(JournalRoute)
+            },
+            SettingsLink(R.string.settings_protected, R.string.settings_protected_summary, R.drawable.ic_shield) {
+                navigate(ProtectedRoute)
             },
             SettingsLink(R.string.settings_how_it_works, R.string.settings_how_it_works_summary, R.drawable.ic_help) {
                 navigate(HowItWorksRoute)
