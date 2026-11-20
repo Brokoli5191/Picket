@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Shared helpers for scripts/capture-fixtures.sh and scripts/device-checks.sh.
-# Requires: bash 4+, adb (platform-tools) in PATH, a device with USB or wireless debugging enabled.
+# Shared helpers for the scripts in this directory.
+# The device scripts need bash 4+, adb (platform-tools) in PATH and a device with USB or wireless debugging.
 
 set -uo pipefail
 

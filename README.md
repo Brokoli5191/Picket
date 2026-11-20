@@ -47,6 +47,22 @@ JDK 21 and the Android SDK (platform `android-37.1`) are needed.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full check, the module layout and how device
 verification works.
 
+## Releases
+
+Releases are built, signed, verified, attested and published by
+[`.github/workflows/release.yml`](.github/workflows/release.yml), which also creates the tag.
+Versions follow `MAJOR.MINOR.PATCH[-rcN]`, and the versionCode is derived from them:
+
+```text
+versionCode = MAJOR * 1000000 + MINOR * 10000 + PATCH * 100 + (N for -rcN, 99 for the final release)
+```
+
+`0.1.0-rc1` is 10001 and `0.1.0` is 10099, so a release candidate updates to its final release and
+every release installs over the previous one. MINOR and PATCH run from 0 to 99, N from 1 to 98.
+
+`scripts/release-dry-run.sh 0.1.0-rc1` rehearses the build and the APK checks of the release workflow
+locally with a throwaway key; nothing is tagged or published.
+
 ## License
 
 Picket is free software under the [GNU General Public License v3.0 or later](LICENSE).
