@@ -45,6 +45,7 @@ object ColorSchemes {
         dark: Boolean,
     ): ColorScheme {
         val c = MaterialDynamicColors()
+
         fun role(color: DynamicColor) = Color(color.getArgb(s))
         val base = if (dark) darkColorScheme() else lightColorScheme()
         return base.copy(

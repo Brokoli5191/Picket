@@ -11,7 +11,6 @@ import androidx.core.net.toUri
 import app.brokoli5191.picket.privileged.client.PrivilegedClient
 import app.brokoli5191.picket.ui.LocalAppContainer
 import app.brokoli5191.picket.ui.PicketApp
-import app.brokoli5191.picket.ui.theme.PicketTheme
 
 class MainActivity : ComponentActivity() {
     private val container get() = (application as PicketApplication).container
@@ -21,9 +20,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             CompositionLocalProvider(LocalAppContainer provides container) {
-                PicketTheme {
-                    PicketApp(onOpenShizuku = ::openShizuku)
-                }
+                PicketApp(onOpenShizuku = ::openShizuku)
             }
         }
     }

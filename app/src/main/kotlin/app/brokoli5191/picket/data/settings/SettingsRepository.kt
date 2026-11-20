@@ -19,8 +19,16 @@ class SettingsRepository(
 ) {
     val settings: Flow<AppSettings> =
         store.data
-            .catch { e -> if (e is IOException) emit(androidx.datastore.preferences.core.emptyPreferences()) else throw e }
-            .map(::read)
+            .catch { e ->
+                if (e is IOException) {
+                    emit(
+                        androidx.datastore.preferences.core
+                            .emptyPreferences(),
+                    )
+                } else {
+                    throw e
+                }
+            }.map(::read)
             .distinctUntilChanged()
 
     suspend fun update(transform: (AppSettings) -> AppSettings) {

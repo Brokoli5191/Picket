@@ -16,11 +16,13 @@ import app.brokoli5191.picket.core.process.Uids
 import app.brokoli5191.picket.data.PackageCatalog
 import app.brokoli5191.picket.data.ProcessFrame
 import app.brokoli5191.picket.data.ProcessSampler
+import app.brokoli5191.picket.data.settings.AppSettings
 import app.brokoli5191.picket.privileged.client.CallTiming
 import app.brokoli5191.picket.privileged.client.PrivilegedClient
 import app.brokoli5191.picket.privileged.client.PrivilegedState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 data class ProcessesUiState(
     val loading: Boolean = true,
@@ -57,9 +60,14 @@ class ProcessesViewModel(
     client: PrivilegedClient,
     private val catalog: PackageCatalog,
     sampler: ProcessSampler,
+    settings: Flow<AppSettings>,
     private val nowMs: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
     private val controls = MutableStateFlow(Controls())
+
+    @Volatile
+    private var intervalMs = AppSettings.DEFAULT_SAMPLING_MS
+    private var systemToggledByUser = false
     private val grouping = ProcessGrouping(catalog::uidOf)
     private val stableOrder = StableOrder<GroupKey>()
     private var lastResortMs = 0L
@@ -78,9 +86,23 @@ class ProcessesViewModel(
             .flowOn(Dispatchers.Default)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ProcessesUiState())
 
+    init {
+        viewModelScope.launch {
+            settings.collect { s ->
+                intervalMs = s.samplingIntervalMs
+                if (!systemToggledByUser) {
+                    controls.update { it.copy(filter = it.filter.copy(showSystem = s.showSystemApps)) }
+                }
+            }
+        }
+    }
+
     fun setSort(order: SortOrder) = controls.update { it.copy(sort = order) }
 
-    fun setShowSystem(show: Boolean) = controls.update { it.copy(filter = it.filter.copy(showSystem = show)) }
+    fun setShowSystem(show: Boolean) {
+        systemToggledByUser = true
+        controls.update { it.copy(filter = it.filter.copy(showSystem = show)) }
+    }
 
     fun setQuery(query: String) = controls.update { it.copy(filter = it.filter.copy(query = query)) }
 
