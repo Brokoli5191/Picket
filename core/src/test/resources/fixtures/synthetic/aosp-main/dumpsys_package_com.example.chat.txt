@@ -1,0 +1,26 @@
+Activity Resolver Table:
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        3a2b1c0 com.example.chat/.MainActivity filter 9f8e7d6
+
+Packages:
+  Package [com.example.chat] (4f3e2d1):
+    appId=10123
+    pkg=Package{6c5b4a3 com.example.chat}
+    codePath=/data/app/~~Zx1=/com.example.chat-Qw2=
+    versionCode=4021 minSdk=26 targetSdk=35
+    versionName=4.2.1
+    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    installerPackageName=com.android.vending
+    install permissions:
+      android.permission.FOREGROUND_SERVICE: granted=true
+      android.permission.INTERNET: granted=true
+    User 0: ceDataInode=31337 deDataInode=31338 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false quarantined=false
+      gids=[3003]
+      runtime permissions:
+        android.permission.POST_NOTIFICATIONS: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.CAMERA: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.READ_CONTACTS: granted=true, flags=[ USER_SET|USER_FIXED]
+      enabledComponents:
+    User 10: ceDataInode=0 deDataInode=0 installed=false hidden=false suspended=false distractionFlags=0 stopped=true notLaunched=true enabled=3 instant=false virtual=false quarantined=false
+      runtime permissions:

@@ -1,0 +1,37 @@
+ACTIVITY MANAGER SERVICES (dumpsys activity services)
+  User 0 active services:
+  * ServiceRecord{c4b2a51 u0 com.example.chat/.push.PushService}
+    intent={cmp=com.example.chat/.push.PushService}
+    packageName=com.example.chat
+    processName=com.example.chat:push
+    baseDir=/data/app/~~Zx1=/com.example.chat-Qw2=/base.apk
+    dataDir=/data/user/0/com.example.chat
+    app=ProcessRecord{8a7b6c5 8123:com.example.chat:push/u0a123}
+    allowWhileInUsePermissionInFgs=true
+    startForegroundCount=1
+    recentCallingPackage=com.example.chat
+    isForeground=true foregroundId=42 types=0x00000200 foregroundNoti=Notification(channel=push shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=FOREGROUND_SERVICE|NO_CLEAR color=0x00000000 vis=PRIVATE)
+    createTime=-2h3m4s5ms startingBgTimeout=--
+    lastActivity=-3m1s2ms restartTime=-2h3m4s5ms createdFromFg=false
+    startRequested=true delayedStop=false stopIfKilled=false callStart=true lastStartId=7
+  * ServiceRecord{1e2d3c4 u0 com.example.chat/.sync.ChatSyncService}
+    intent={act=android.content.SyncAdapter cmp=com.example.chat/.sync.ChatSyncService}
+    packageName=com.example.chat
+    processName=com.example.chat
+    app=ProcessRecord{5f4e3d2 8001:com.example.chat/u0a123}
+    createTime=-15m2s1ms startingBgTimeout=--
+    lastActivity=-15m2s1ms restartTime=-15m2s1ms createdFromFg=false
+    Bindings:
+    * IntentBindRecord{7a6b5c4 CREATE}:
+      intent={act=android.content.SyncAdapter cmp=com.example.chat/.sync.ChatSyncService}
+      binder=android.os.BinderProxy@2b3c4d5
+      requested=true received=true hasBound=true doRebind=false
+      * Client AppBindRecord{9c8d7e6 ProcessRecord{1a2b3c4 1532:system/1000}}
+        Per-process Connections:
+          ConnectionRecord{3d4e5f6 u0 CR com.example.chat/.sync.ChatSyncService:@7e8f9a0}
+    All Connections:
+      ConnectionRecord{3d4e5f6 u0 CR com.example.chat/.sync.ChatSyncService:@7e8f9a0}
+
+  Connection bindings to services:
+  * ConnectionRecord{3d4e5f6 u0 CR com.example.chat/.sync.ChatSyncService:@7e8f9a0}
+    binding=AppBindRecord{9c8d7e6 com.example.chat/.sync.ChatSyncService:system}

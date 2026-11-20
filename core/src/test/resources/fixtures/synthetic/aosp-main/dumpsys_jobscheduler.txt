@@ -1,0 +1,242 @@
+Registered 3 jobs:
+  JOB #1000/8: 2e9d4b0 android/com.android.server.net.watchlist.ReportWatchlistJobService
+    1000 tag=*job*/android/com.android.server.net.watchlist.ReportWatchlistJobService
+    Source: uid=1000 user=0 pkg=android
+    JobInfo:
+      Service: android/com.android.server.net.watchlist.ReportWatchlistJobService
+      PERIODIC: interval=+1d0h0m0s0ms flex=+3h0m0s0ms
+      PERSISTED
+      Priority: 300 [DEFAULT]
+      Requires: charging=false batteryNotLow=false deviceIdle=false
+      Backoff: policy=1 initial=+30s0ms
+      Has early constraint
+      Has late constraint
+    Required constraints: TIMING_DELAY DEADLINE FLEXIBILITY [0xc0200000]
+    Dynamic constraints:
+    Satisfied constraints: FLEXIBILITY DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x3600000]
+    Unsatisfied constraints: TIMING_DELAY DEADLINE [0xc0000000]
+    Num Required Flexible constraints: 0
+    Num Dropped Flexible constraints: 0
+    Constraint history:
+      -31m47s588ms = FLEXIBILITY DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x3600000]
+    Tracking: TIME QUOTA
+    Implicit constraints:
+      readyNotDozing: true
+      readyNotRestrictedInBg: true
+      readyComponentEnabled: true
+    Started with foreground flag: false
+    Standby bucket: EXEMPTED
+    Enqueue time: -31m47s588ms
+    Run time: earliest=+20h28m12s412ms, latest=+23h28m12s412ms, original latest=+23h28m12s412ms
+    Last successful run: 2026-11-20 13:58:12
+    Restricted due to: none.
+    Ready: false (job=false user=true !restricted=true !pending=true !active=true !backingup=true comp=true)
+  JOB #u0a123/1001: c44f1e8 com.example.chat/.sync.SyncJobService
+    u0a123 tag=*job*/com.example.chat/.sync.SyncJobService
+    Source: uid=u0a123 user=0 pkg=com.example.chat
+    JobInfo:
+      Service: com.example.chat/.sync.SyncJobService
+      PERIODIC: interval=+30m0s0ms flex=+10m0s0ms
+      PERSISTED
+      Priority: 300 [DEFAULT]
+      Requires: charging=false batteryNotLow=false deviceIdle=false
+      Backoff: policy=1 initial=+30s0ms
+      Has early constraint
+      Has late constraint
+    Required constraints: TIMING_DELAY DEADLINE FLEXIBILITY [0xc0200000]
+    Dynamic constraints:
+    Satisfied constraints: DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x3400000]
+    Unsatisfied constraints: TIMING_DELAY DEADLINE FLEXIBILITY [0xc0200000]
+    Num Required Flexible constraints: 0
+    Num Dropped Flexible constraints: 0
+    Constraint history:
+      -17m56s850ms = DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x3400000]
+    Tracking: TIME QUOTA
+    Implicit constraints:
+      readyNotDozing: true
+      readyNotRestrictedInBg: true
+      readyComponentEnabled: true
+    Started with foreground flag: false
+    Standby bucket: ACTIVE
+    Enqueue time: -17m56s850ms
+    Run time: earliest=+2m3s150ms, latest=+12m3s150ms, original latest=+12m3s150ms
+    Last successful run: 2026-11-20 14:12:03
+    Restricted due to: none.
+    Ready: false (job=false user=true !restricted=true !pending=true !active=true !backingup=true comp=true)
+  JOB #u0a201/7: 0c3d7e5 com.example.weather/.WidgetUpdateJob
+    u0a201 tag=*job*/com.example.weather/.WidgetUpdateJob
+    Source: uid=u0a201 user=0 pkg=com.example.weather
+    JobInfo:
+      Service: com.example.weather/.WidgetUpdateJob
+      Priority: 300 [DEFAULT]
+      Requires: charging=false batteryNotLow=false deviceIdle=false
+      Minimum latency: +1h0m0s111ms
+      Max execution delay: +2h0m0s0ms
+      Backoff: policy=1 initial=+30s0ms
+      Has early constraint
+      Has late constraint
+    Required constraints: TIMING_DELAY DEADLINE FLEXIBILITY [0xc0200000]
+    Dynamic constraints:
+    Satisfied constraints: TIMING_DELAY FLEXIBILITY DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x83600000]
+    Unsatisfied constraints: DEADLINE [0x40000000]
+    Num Required Flexible constraints: 0
+    Num Dropped Flexible constraints: 0
+    Constraint history:
+      -1h2m0s112ms = DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x3400000]
+      -2m0s1ms = TIMING_DELAY DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x83400000]
+      -3s413ms = TIMING_DELAY FLEXIBILITY DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x83600000]
+    Tracking: TIME QUOTA
+    Implicit constraints:
+      readyNotDozing: true
+      readyNotRestrictedInBg: true
+      readyDeadlineSatisfied: false
+      readyComponentEnabled: true
+    Started with foreground flag: false
+    Standby bucket: RARE
+    Enqueue time: -1h2m0s112ms
+    Run time: earliest=-2m0s1ms, latest=+57m59s888ms, original latest=+57m59s888ms
+    Restricted due to: none.
+    Ready: false (job=true user=true !restricted=true !pending=true !active=false !backingup=true comp=true)
+
+Historical stats at 2026-11-20-10-02-41 (-4h27m19s0ms) over +30m0s771ms:
+  Max concurrency: 3 total, 1 foreground
+  
+  1000 / android:
+    2x active 
+    2x successful_finish
+  u0a123 / com.example.chat:
+    4x pending 1% 4x active 
+    4x successful_finish
+  u0a146 / com.google.android.gms:
+    6x pending 2% 6x active 
+    1x constraints, 5x successful_finish
+
+Current stats at 2026-11-20-12-31-05 (-1h58m55s0ms) over +34m2s113ms:
+  Max concurrency: 2 total, 0 foreground
+  
+  1000 / android:
+    1x pending 1x active 
+    1x successful_finish
+  u0a123 / com.example.chat:
+    3x pending 1% 3x active 
+    3x successful_finish
+  u0a146 / com.google.android.gms:
+    1x pending 1% 1x active 
+    1x successful_finish
+  u0a201 / com.example.weather:
+    1x pending 1x active  (active)
+
+  Job history:
+     -1h44m59s790ms START-P: #u0a123/1001 com.example.chat/.sync.SyncJobService
+     -1h44m56s899ms  STOP-P: #u0a123/1001 com.example.chat/.sync.SyncJobService app called jobFinished
+     -1h29m59s700ms   START: #u0a146/107 com.google.android.gms/.gcm.nts.TaskExecutionService
+     -1h29m50s999ms    STOP: #u0a146/107 com.google.android.gms/.gcm.nts.TaskExecutionService app called jobFinished
+       -59m59s850ms START-P: #u0a123/1001 com.example.chat/.sync.SyncJobService
+       -59m57s010ms  STOP-P: #u0a123/1001 com.example.chat/.sync.SyncJobService app called jobFinished
+       -31m48s000ms   START: #1000/8 android/com.android.server.net.watchlist.ReportWatchlistJobService
+       -31m47s588ms    STOP: #1000/8 android/com.android.server.net.watchlist.ReportWatchlistJobService app called jobFinished
+       -18m00s000ms START-P: #u0a123/1001 com.example.chat/.sync.SyncJobService
+       -17m56s850ms  STOP-P: #u0a123/1001 com.example.chat/.sync.SyncJobService app called jobFinished
+           -2s310ms START-P: #u0a201/7 com.example.weather/.WidgetUpdateJob
+
+Pending queue:
+  None
+
+Active jobs:
+  Slot #0(ID=3): 0c3d7e5 #u0a201/7 com.example.weather/.WidgetUpdateJob
+    Running for: +2s310ms, timeout at: +9m57s690ms
+    Remaining execution limits: [+9m57s690ms, +9m57s690ms]
+      u0a201 tag=*job*/com.example.weather/.WidgetUpdateJob
+      Source: uid=u0a201 user=0 pkg=com.example.weather
+      Required constraints: TIMING_DELAY DEADLINE FLEXIBILITY [0xc0200000]
+      Dynamic constraints:
+      Tracking: TIME QUOTA
+      Implicit constraints:
+        readyNotDozing: true
+        readyNotRestrictedInBg: true
+        readyDeadlineSatisfied: false
+        readyComponentEnabled: true
+      Started with foreground flag: false
+      Standby bucket: RARE
+      Enqueue time: -1h2m0s112ms
+      Run time: earliest=-2m0s1ms, latest=+57m59s888ms, original latest=+57m59s888ms
+    Evaluated bias: 0 [DEFAULT]
+    Active at -2s309ms, pending for +1s103ms
+
+Idle contexts (3):
+  ID=0: inactive since -17m56s850ms, stopped because: app called jobFinished
+  ID=1: inactive since -31m47s588ms, stopped because: app called jobFinished
+  ID=2: inactive
+
+Recently completed jobs:
+  -17m56s850ms
+      5f0e2a1 #u0a123/1001 com.example.chat/.sync.SyncJobService
+      u0a123 tag=*job*/com.example.chat/.sync.SyncJobService
+      Source: uid=u0a123 user=0 pkg=com.example.chat
+      JobInfo:
+        Service: com.example.chat/.sync.SyncJobService
+        PERIODIC: interval=+30m0s0ms flex=+10m0s0ms
+        PERSISTED
+        Priority: 300 [DEFAULT]
+        Requires: charging=false batteryNotLow=false deviceIdle=false
+        Backoff: policy=1 initial=+30s0ms
+        Has early constraint
+        Has late constraint
+      Required constraints: TIMING_DELAY DEADLINE FLEXIBILITY [0xc0200000]
+      Dynamic constraints:
+      Satisfied constraints: TIMING_DELAY DEADLINE FLEXIBILITY DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0xc3600000]
+      Unsatisfied constraints:
+      Num Required Flexible constraints: 0
+      Num Dropped Flexible constraints: 0
+      Constraint history:
+        -59m57s10ms = DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x3400000]
+        -39m57s10ms = TIMING_DELAY DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x83400000]
+        -29m57s10ms = TIMING_DELAY DEADLINE DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0xc3400000]
+        -18m0s130ms = TIMING_DELAY DEADLINE FLEXIBILITY DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0xc3600000]
+      Implicit constraints:
+        readyNotDozing: true
+        readyNotRestrictedInBg: true
+        readyComponentEnabled: true
+      Started with foreground flag: false
+      Standby bucket: ACTIVE
+      Enqueue time: -59m57s10ms
+      Run time: earliest=-39m57s10ms, latest=-29m57s10ms, original latest=-29m57s10ms
+      Cumulative execution time=+3s150ms
+      Last successful run: 2026-11-20 13:30:02
+  -1h29m50s999ms
+      b81c09d #u0a146/107 com.google.android.gms/.gcm.nts.TaskExecutionService
+      u0a146 tag=*job*/com.google.android.gms/.gcm.nts.TaskExecutionService
+      Source: uid=u0a146 user=0 pkg=com.google.android.gms
+      JobInfo:
+        Service: com.google.android.gms/.gcm.nts.TaskExecutionService
+        Priority: 300 [DEFAULT]
+        Requires: charging=false batteryNotLow=false deviceIdle=false
+        Minimum latency: +1m0s0ms
+        Backoff: policy=1 initial=+30s0ms
+        Has early constraint
+      Required constraints: TIMING_DELAY FLEXIBILITY [0x80200000]
+      Dynamic constraints:
+      Satisfied constraints: TIMING_DELAY FLEXIBILITY DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x83600000]
+      Unsatisfied constraints:
+      Num Required Flexible constraints: 0
+      Num Dropped Flexible constraints: 0
+      Constraint history:
+        -2h31m0s0ms = DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x3400000]
+        -2h30m0s0ms = TIMING_DELAY DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x83400000]
+        -1h29m59s880ms = TIMING_DELAY FLEXIBILITY DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA [0x83600000]
+      Doze whitelisted: true
+      Implicit constraints:
+        readyNotDozing: true
+        readyNotRestrictedInBg: true
+        readyComponentEnabled: true
+      Started with foreground flag: false
+      Standby bucket: EXEMPTED
+      Enqueue time: -2h31m0s0ms
+      Run time: earliest=-2h30m0s0ms, latest=none, original latest=none
+      Cumulative execution time=+8s701ms
+
+
+
+mReadyToRock=true
+mReportedActive=true
+

@@ -1,0 +1,15 @@
+
+Wake Locks: size=6
+  PARTIAL_WAKE_LOCK                 '*alarm*' ACQ=-48ms (uid=1000 pid=1532 ws=WorkSource{10123})
+  PARTIAL_WAKE_LOCK                 '*job*/com.example.weather/.WidgetUpdateJob' ACQ=-2s310ms (uid=1000 pid=1532 ws=WorkSource{10201 com.example.weather})
+  PARTIAL_WAKE_LOCK                 'ChatPush:socket' ACQ=-312ms (uid=10123 pid=8123)
+  PARTIAL_WAKE_LOCK                 'NlpWakeLock' ACQ=-71ms (uid=10146 pid=4021 ws=WorkSource{10146 com.google.android.gms})
+  PARTIAL_WAKE_LOCK                 'GCoreFlp' ACQ=-1m12s3ms LONG (uid=10146 pid=4021 ws=WorkSource{10146 com.google.android.gms})
+  PARTIAL_WAKE_LOCK                 'WeatherRefresh' DISABLED (uid=10201 pid=9120)
+
+Suspend Blockers: size=4
+  PowerManagerService.Booting: ref count=0 []
+  PowerManagerService.WakeLocks: ref count=1 [unknown: (11-20 14:29:57.690)]
+  PowerManagerService.Display: ref count=0 []
+  PowerManagerService.Broadcasts: ref count=0 []
+

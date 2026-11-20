@@ -40,6 +40,6 @@ data class WakeupReport(
     /** Bounded; newest first. */
     val events: List<WakeupEvent>,
     val sources: List<SourceStatus>,
-    /** Some sources only report totals since the last charge; the UI says so. */
-    val totalsSince: String? = null,
+    /** Wall-clock start of the [apps] totals (battery statistics reset at the last charge); null if unknown. */
+    val totalsSinceMs: Long? = null,
 )

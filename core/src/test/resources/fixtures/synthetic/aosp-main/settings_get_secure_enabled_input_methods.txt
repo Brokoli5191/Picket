@@ -1,0 +1,1 @@
+com.samsung.android.honeyboard/.service.HoneyBoardService:org.example.keyboard/.KeyboardService;-1221324;12345
