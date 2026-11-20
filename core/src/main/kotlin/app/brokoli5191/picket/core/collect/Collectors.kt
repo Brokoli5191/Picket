@@ -141,18 +141,27 @@ class WatchersCollector(
             add(WatcherKind.VPN, alwaysOn, detail = ALWAYS_ON, active = false)
         }
 
-        for (role in Role.entries) {
-            val name = role.name.lowercase()
-            val holders = s.source("role $name", ReadCommands.roleHolders(role, userId), RoleHolders::parse)
-            for (pkg in holders.orEmpty()) add(WatcherKind.DEFAULT_ROLE, pkg, detail = name)
+        // get-role-holders exists from API 34; older releases fall back to `dumpsys role`.
+        val probe = runCatching { executor.run(ReadCommands.roleHolders(Role.entries.first(), userId)) }.getOrNull()
+        if (probe != null && probe.ok && "Unknown command" !in probe.stdout) {
+            for (role in Role.entries) {
+                val name = role.name.lowercase()
+                val holders = s.source("role $name", ReadCommands.roleHolders(role, userId), RoleHolders::parse)
+                for (pkg in holders.orEmpty()) add(WatcherKind.DEFAULT_ROLE, pkg, detail = name)
+            }
+        } else {
+            val all = s.source("default roles", ReadCommands.roleDump) { RoleHolders.parseDump(it, userId) }
+            for (role in Role.entries) {
+                val name = role.name.lowercase()
+                for (pkg in all?.get(role.roleName).orEmpty()) add(WatcherKind.DEFAULT_ROLE, pkg, detail = name)
+            }
         }
 
+        // Explicit DND grants; the Settings key is only maintained up to Android 11.
         val dnd =
-            secure(
-                "Do Not Disturb access",
-                SecureKey.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
-                SettingsLists::packages,
-            )
+            s.source("Do Not Disturb access", ReadCommands.notificationZen) {
+                NotificationDumpParser.dndAccessPackages(it, userId)
+            }
         for (pkg in dnd.orEmpty()) add(WatcherKind.DND_ACCESS, pkg)
 
         commandsRun = s.commandsRun

@@ -1,0 +1,17 @@
+
+  Condition providers:
+    Allowed condition providers:
+      com.example.notes:com.google.android.apps.wellbeing (user: 0 isPrimary: true)
+      com.google.android.ext.services:com.example.notes:com.google.android.gms (user: 0 isPrimary: false)
+      com.google.android.apps.wellbeing (user: 10 isPrimary: true)
+      com.google.android.ext.services (user: 10 isPrimary: false)
+    Has user set:
+      userId=0 value={com.example.notes/com.example.notes.sync.NotesNotificationListener, com.example.notes, com.google.android.apps.wellbeing, com.google.android.gms/com.google.android.gms.notifications.GmsNotificationListenerService, com.google.android.ext.services/android.ext.services.notification.Assistant}
+      userId=10 value={com.example.notes/com.example.notes.sync.NotesNotificationListener, com.google.android.apps.wellbeing, com.google.android.ext.services/android.ext.services.notification.Assistant}
+    All condition providers (0) enabled for current profiles:
+    Live condition providers (4):
+      ComponentInfo{android/com.android.server.notification.CountdownConditionProvider} (user 0): android.service.notification.ConditionProviderService$Provider@4e0c2a7 SYSTEM
+      ComponentInfo{android/com.android.server.notification.ScheduleConditionProvider} (user 0): android.service.notification.ConditionProviderService$Provider@b81f6d3 SYSTEM
+      ComponentInfo{android/com.android.server.notification.EventConditionProvider} (user 0): android.service.notification.ConditionProviderService$Provider@1d9a5c2 SYSTEM
+      ComponentInfo{android/com.android.server.notification.CustomManualConditionProvider} (user 0): android.service.notification.ConditionProviderService$Provider@6f37e08 SYSTEM
+    Snoozed condition providers (0):

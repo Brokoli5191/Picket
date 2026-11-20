@@ -192,9 +192,12 @@ object PackageDumpParser {
 
 /** `dumpsys activity services`: one block per `* ServiceRecord{hash uN pkg/cls}`. */
 object ActiveServicesParser {
-    private val header = Regex("^\\s*\\* ServiceRecord\\{[0-9a-f]+ u(\\d+) ([^ }]+)}")
+    // API 35+ appends " c:<callingPackage>" inside the braces.
+    private val header = Regex("^\\s*\\* ServiceRecord\\{[0-9a-f]+ u(\\d+) ([^ }]+)[^}]*}")
     private val app = Regex("app=ProcessRecord\\{[0-9a-f]+ (\\d+):([^/ ]+)/")
-    private val types = Regex("\\btypes=0x([0-9a-fA-F]+)")
+
+    // API 34 prints types=%08X, API 35+ types=0x%08X; older releases print no type at all.
+    private val types = Regex("\\btypes=(?:0x)?([0-9a-fA-F]+)")
     private val fgType = Regex("\\bforegroundServiceType=0x([0-9a-fA-F]+)")
 
     fun parse(text: String): List<RunningService> {
@@ -222,11 +225,12 @@ object ActiveServicesParser {
                 continue
             }
             val s = current ?: continue
-            if (line.isNotBlank() && indent <= blockIndent) {
+            val t = line.trim()
+            // API 34+ prints " startCommandResult=" with a single leading space inside the block.
+            if (line.isNotBlank() && indent <= blockIndent && !t.startsWith("startCommandResult=")) {
                 flush()
                 continue
             }
-            val t = line.trim()
             current =
                 when {
                     t.startsWith("processName=") -> {
@@ -291,4 +295,17 @@ object ActiveServicesParser {
         flush()
         return services
     }
+}
+
+/** `dumpsys meminfo --checkin PID` (checkin version 4 on every release): total PSS is field 19, in kB. */
+object MeminfoParser {
+    private const val TOTAL_PSS = 18
+
+    fun totalPssKb(text: String): Long? =
+        text
+            .lineSequence()
+            .map { it.trim().split(',') }
+            .firstOrNull { it.size > TOTAL_PSS && it[0] == "4" }
+            ?.get(TOTAL_PSS)
+            ?.toLongOrNull()
 }

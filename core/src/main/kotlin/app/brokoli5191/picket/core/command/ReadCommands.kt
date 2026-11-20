@@ -22,7 +22,6 @@ enum class SecureKey(
     val key: String,
 ) {
     ENABLED_NOTIFICATION_LISTENERS("enabled_notification_listeners"),
-    ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES("enabled_notification_policy_access_packages"),
     ENABLED_ACCESSIBILITY_SERVICES("enabled_accessibility_services"),
     ACCESSIBILITY_ENABLED("accessibility_enabled"),
     ENABLED_INPUT_METHODS("enabled_input_methods"),
@@ -51,6 +50,8 @@ object ReadCommands {
 
     val activityServices = ShellCommand.of(DUMPSYS, "activity", "services")
     val notification = ShellCommand.of(DUMPSYS, "notification")
+    val notificationZen = ShellCommand.of(DUMPSYS, "notification", "--zen")
+    val roleDump = ShellCommand.of(DUMPSYS, "role")
     val devicePolicy = ShellCommand.of(DUMPSYS, "device_policy")
     val vpnManagement = ShellCommand.of(DUMPSYS, "vpn_management")
     val alarm = ShellCommand.of(DUMPSYS, "alarm")

@@ -3,14 +3,81 @@ package app.brokoli5191.picket.core.parse
 import app.brokoli5191.picket.core.model.AppOpEntry
 import app.brokoli5191.picket.core.validation.Validators
 
-/** `cmd role get-role-holders ROLE`: holders joined with ';' on one line (RoleShellCommand). */
+/** `cmd role get-role-holders ROLE`: holders joined with ';' on one line (RoleShellCommand, API 34+). */
 object RoleHolders {
-    fun parse(text: String): List<String> =
-        text
+    /** Throws [UnsupportedOperationException] where the subcommand does not exist (prints on stdout, exit 0). */
+    fun parse(text: String): List<String> {
+        if (text.contains("Unknown command")) throw UnsupportedOperationException("get-role-holders not available")
+        return text
             .trim()
             .split(';')
             .map { it.trim() }
             .filter { it.isNotEmpty() && Validators.isValidPackageName(it) }
+    }
+
+    /**
+     * `dumpsys role` (all releases): per `user_id=N`, role blocks with `name=ROLE` and either
+     * `holders=pkg` or `holders=[` + one package per line + `]`.
+     */
+    fun parseDump(
+        text: String,
+        userId: Int,
+    ): Map<String, List<String>> {
+        val result = LinkedHashMap<String, MutableList<String>>()
+        var user: Int? = null
+        var role: String? = null
+        var inList = false
+        for (raw in text.lineSequence()) {
+            val t = raw.trim()
+            when {
+                t.startsWith("user_id=") -> {
+                    user = t.removePrefix("user_id=").toIntOrNull()
+                    role = null
+                }
+
+                user != userId -> {
+                    continue
+                }
+
+                t.startsWith("name=") -> {
+                    role = t.removePrefix("name=")
+                    inList = false
+                }
+
+                t == "holders=[" -> {
+                    inList = true
+                }
+
+                inList && t == "]" -> {
+                    inList = false
+                }
+
+                inList -> {
+                    role?.let { r ->
+                        if (Validators.isValidPackageName(t)) {
+                            result.getOrPut(r) { mutableListOf() } +=
+                                t
+                        }
+                    }
+                }
+
+                t.startsWith("holders=") -> {
+                    role?.let { r ->
+                        t
+                            .removePrefix(
+                                "holders=",
+                            ).split(';', ',')
+                            .map { it.trim() }
+                            .filter(Validators::isValidPackageName)
+                            .forEach {
+                                result.getOrPut(r) { mutableListOf() } += it
+                            }
+                    }
+                }
+            }
+        }
+        return result
+    }
 }
 
 /** `cmd appops` output (AppOpsService.Shell). */
@@ -138,6 +205,39 @@ object DevicePolicyParser {
 
 /** `dumpsys notification`: components of the "Live notification listeners (N):" section (bound right now). */
 object NotificationDumpParser {
+    private val approvedLine = Regex("^\\s+(.*) \\(user: (-?\\d+) isPrimary: (true|false)")
+
+    /**
+     * Explicit Do Not Disturb access grants from `dumpsys notification --zen`: the
+     * "Allowed condition providers:" lines with `isPrimary: true` (packages joined with ':').
+     * `isPrimary: false` lists the implicit grant every approved listener gets. The Settings key
+     * `enabled_notification_policy_access_packages` is only maintained up to Android 11.
+     */
+    fun dndAccessPackages(
+        text: String,
+        userId: Int,
+    ): List<String> {
+        val result = mutableListOf<String>()
+        var inSection = false
+        for (line in text.lineSequence()) {
+            val t = line.trim()
+            if (t == "Allowed condition providers:") {
+                inSection = true
+                continue
+            }
+            if (!inSection) continue
+            val m = approvedLine.find(line) ?: break
+            if (m.groupValues[2].toInt() == userId && m.groupValues[3] == "true") {
+                result +=
+                    m.groupValues[1]
+                        .split(':')
+                        .map { it.trim() }
+                        .filter(Validators::isValidPackageName)
+            }
+        }
+        return result.distinct()
+    }
+
     private val live = Regex("^\\s*Live notification listeners \\(\\d+\\):")
     private val bound = Regex("^\\s*ComponentInfo\\{([^}]+)} \\(user (\\d+)\\)")
 
