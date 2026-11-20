@@ -3,11 +3,18 @@ package app.brokoli5191.picket
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.datastore.preferences.preferencesDataStore
+import app.brokoli5191.picket.data.AppDetailRepository
 import app.brokoli5191.picket.data.PackageCatalog
+import app.brokoli5191.picket.data.WakeupsRepository
+import app.brokoli5191.picket.data.WatchersRepository
+import app.brokoli5191.picket.data.settings.SettingsRepository
 import app.brokoli5191.picket.privileged.client.PrivilegedClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+
+private val Context.settingsStore by preferencesDataStore(name = "settings")
 
 /**
  * Manual dependency injection: one instance per process, created in [PicketApplication.onCreate].
@@ -23,6 +30,8 @@ class AppContainer(
 
     val packageCatalog = PackageCatalog(appContext.packageManager)
 
+    val settingsRepository = SettingsRepository(appContext.settingsStore)
+
     val privilegedClient =
         PrivilegedClient(
             context = appContext,
@@ -32,6 +41,12 @@ class AppContainer(
             serviceVersion = serviceVersion(appContext),
             debuggable = BuildConfig.DEBUG,
         )
+
+    val watchersRepository = WatchersRepository { privilegedClient.listWatchers() }
+
+    val wakeupsRepository = WakeupsRepository { windowMs -> privilegedClient.wakeups(windowMs) }
+
+    val appDetailRepository = AppDetailRepository { pkg, userId -> privilegedClient.appDetail(pkg, userId) }
 
     private companion object {
         /**

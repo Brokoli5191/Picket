@@ -103,15 +103,20 @@ internal fun resolveColorScheme(
     val dynamic = appearance.dynamicColor && dynamicAvailable && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val scheme =
         when {
-            dynamic && appearance.contrast == ContrastPref.SYSTEM ->
+            dynamic && appearance.contrast == ContrastPref.SYSTEM -> {
                 // The platform's dynamic roles already follow the system contrast setting.
                 if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            }
+
             dynamic -> {
                 // An explicit contrast needs the scheme rebuilt from the wallpaper's seed colour.
                 val seed = wallpaperSeed(context) ?: Seeds.at(appearance.seed).argb
                 ColorSchemes.fromSeed(seed, dark, SchemeStyle.TONAL_SPOT, contrastLevel)
             }
-            else -> ColorSchemes.fromSeed(Seeds.at(appearance.seed).argb, dark, appearance.style, contrastLevel)
+
+            else -> {
+                ColorSchemes.fromSeed(Seeds.at(appearance.seed).argb, dark, appearance.style, contrastLevel)
+            }
         }
     return if (dark && appearance.pureBlack) ColorSchemes.pureBlack(scheme) else scheme
 }
@@ -143,6 +148,7 @@ private fun rememberSystemContrast(context: Context): Float {
 @Composable
 private fun rememberAnimatorDurationScale(context: Context): Float {
     val resolver = context.contentResolver
+
     fun read() = Settings.Global.getFloat(resolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
     var scale by remember(resolver) { mutableFloatStateOf(read()) }
     DisposableEffect(resolver) {
@@ -152,7 +158,11 @@ private fun rememberAnimatorDurationScale(context: Context): Float {
                     scale = read()
                 }
             }
-        resolver.registerContentObserver(Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE), false, observer)
+        resolver.registerContentObserver(
+            Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+            false,
+            observer,
+        )
         onDispose { resolver.unregisterContentObserver(observer) }
     }
     return scale
