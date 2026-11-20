@@ -12,7 +12,11 @@ import android.util.Log
 import app.brokoli5191.picket.core.ipc.PayloadCodec
 import app.brokoli5191.picket.core.ipc.Reply
 import app.brokoli5191.picket.core.ipc.ServiceError
+import app.brokoli5191.picket.core.model.AppDetail
 import app.brokoli5191.picket.core.model.ProcessSnapshot
+import app.brokoli5191.picket.core.model.WakeupReport
+import app.brokoli5191.picket.core.model.WatchersSnapshot
+import app.brokoli5191.picket.core.process.Uids
 import app.brokoli5191.picket.privileged.IPicketService
 import app.brokoli5191.picket.privileged.service.PicketUserService
 import kotlinx.coroutines.CoroutineDispatcher
@@ -149,6 +153,18 @@ class PrivilegedClient(
         }
 
     suspend fun listProcesses(): Reply<ProcessSnapshot> = call(ProcessSnapshot.serializer()) { it.listProcesses() }
+
+    suspend fun listWatchers(userId: Int = currentUserId()): Reply<WatchersSnapshot> =
+        call(WatchersSnapshot.serializer()) { it.listWatchers(userId) }
+
+    suspend fun appDetail(
+        packageName: String,
+        userId: Int,
+    ): Reply<AppDetail> = call(AppDetail.serializer()) { it.appDetail(packageName, userId) }
+
+    suspend fun wakeups(windowMs: Long): Reply<WakeupReport> = call(WakeupReport.serializer()) { it.wakeups(windowMs) }
+
+    private fun currentUserId(): Int = android.os.Process.myUid() / Uids.PER_USER_RANGE
 
     /**
      * Runs one typed operation on the IO dispatcher. Transport failures (service gone, protocol
