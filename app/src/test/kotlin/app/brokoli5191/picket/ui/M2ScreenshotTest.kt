@@ -4,6 +4,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import app.brokoli5191.picket.core.process.GroupKey
+import app.brokoli5191.picket.data.settings.AppearanceSettings
+import app.brokoli5191.picket.data.settings.ThemeMode
 import app.brokoli5191.picket.core.process.GroupLabel
 import app.brokoli5191.picket.core.process.GroupRow
 import app.brokoli5191.picket.core.process.Importance
@@ -32,7 +34,7 @@ class M2ScreenshotTest {
     @Test
     fun connectionNotRunning() {
         compose.setContent {
-            PicketTheme(darkTheme = false, dynamicColor = false) {
+            PicketTheme(AppearanceSettings(themeMode = ThemeMode.LIGHT, dynamicColor = false)) {
                 Surface { ConnectionScreen(PrivilegedState.NotRunning, {}, {}, {}) }
             }
         }
@@ -42,7 +44,7 @@ class M2ScreenshotTest {
     @Test
     fun processesDark() {
         compose.setContent {
-            PicketTheme(darkTheme = true, dynamicColor = false) {
+            PicketTheme(AppearanceSettings(themeMode = ThemeMode.DARK, dynamicColor = false)) {
                 Surface { ProcessesScreen(sampleState(), {}, {}, {}, {}, {}) }
             }
         }
