@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.android.test) apply false
+    alias(libs.plugins.android.lint) apply false
     // Declaring kotlin-jvm here also pins the Kotlin Gradle plugin that AGP's
     // built-in Kotlin support uses (AGP only ships a runtime dependency on an older KGP).
     alias(libs.plugins.kotlin.jvm) apply false
