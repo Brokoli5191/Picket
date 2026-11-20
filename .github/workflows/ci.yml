@@ -43,6 +43,7 @@ jobs:
           verifyRoborazziDebug
           assembleDebug
           verifyNoInternetPermission
+          :baselineprofile:compileBenchmarkReleaseKotlin
 
       - name: Verify the APK requests no INTERNET permission
         run: |
