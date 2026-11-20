@@ -9,6 +9,9 @@ import android.os.IBinder
 import android.os.RemoteException
 import android.os.SystemClock
 import android.util.Log
+import app.brokoli5191.picket.core.action.Action
+import app.brokoli5191.picket.core.action.ActionOutcome
+import app.brokoli5191.picket.core.action.ActionPlan
 import app.brokoli5191.picket.core.ipc.PayloadCodec
 import app.brokoli5191.picket.core.ipc.Reply
 import app.brokoli5191.picket.core.ipc.ServiceError
@@ -164,6 +167,18 @@ class PrivilegedClient(
     ): Reply<AppDetail> = call(AppDetail.serializer()) { it.appDetail(packageName, userId) }
 
     suspend fun wakeups(windowMs: Long): Reply<WakeupReport> = call(WakeupReport.serializer()) { it.wakeups(windowMs) }
+
+    suspend fun planAction(action: Action): Reply<ActionPlan> =
+        call(ActionPlan.serializer()) { it.planAction(PayloadCodec.encode(Action.serializer(), action)) }
+
+    suspend fun planDisableAccessibility(
+        packageName: String,
+        userId: Int,
+        component: String,
+    ): Reply<ActionPlan> = call(ActionPlan.serializer()) { it.planDisableAccessibility(packageName, userId, component) }
+
+    suspend fun executePlan(plan: ActionPlan): Reply<ActionOutcome> =
+        call(ActionOutcome.serializer()) { it.executePlan(PayloadCodec.encode(ActionPlan.serializer(), plan)) }
 
     /** PSS in kB; expensive, so only on explicit request. */
     suspend fun pss(pid: Int): Reply<Long> = call(Long.serializer()) { it.pss(pid) }
