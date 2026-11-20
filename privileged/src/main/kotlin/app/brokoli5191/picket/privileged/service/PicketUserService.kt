@@ -13,6 +13,7 @@ import app.brokoli5191.picket.core.collect.WakeupsCollector
 import app.brokoli5191.picket.core.collect.WatchersCollector
 import app.brokoli5191.picket.core.command.CommandExecutor
 import app.brokoli5191.picket.core.command.CommandOutput
+import app.brokoli5191.picket.core.command.ReadCommands
 import app.brokoli5191.picket.core.command.ShellCommand
 import app.brokoli5191.picket.core.ipc.CallCost
 import app.brokoli5191.picket.core.ipc.PayloadCodec
@@ -22,10 +23,12 @@ import app.brokoli5191.picket.core.model.AppDetail
 import app.brokoli5191.picket.core.model.ProcessSnapshot
 import app.brokoli5191.picket.core.model.WakeupReport
 import app.brokoli5191.picket.core.model.WatchersSnapshot
+import app.brokoli5191.picket.core.parse.MeminfoParser
 import app.brokoli5191.picket.core.proc.ProcessSnapshotReader
 import app.brokoli5191.picket.core.validation.Validators
 import app.brokoli5191.picket.privileged.IPicketService
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.serializer
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -106,6 +109,14 @@ class PicketUserService(
         call(AppDetail.serializer()) {
             val pkg = Validators.requirePackageName(packageName.orEmpty())
             AppDetailCollector(Executor(this)).collect(pkg, Validators.requireUserId(userId))
+        }
+
+    override fun pss(pid: Int): ByteArray =
+        call(Long.serializer()) {
+            val command = ReadCommands.meminfo(pid)
+            commandsRun++
+            val result = runner.run(command)
+            MeminfoParser.totalPssKb(result.stdout) ?: throw IllegalStateException("No memory info for pid $pid")
         }
 
     override fun wakeups(windowMs: Long): ByteArray =

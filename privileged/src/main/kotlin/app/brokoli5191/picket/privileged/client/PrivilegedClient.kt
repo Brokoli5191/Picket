@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.serializer
 import rikka.shizuku.Shizuku
 import rikka.sui.Sui
 
@@ -163,6 +164,9 @@ class PrivilegedClient(
     ): Reply<AppDetail> = call(AppDetail.serializer()) { it.appDetail(packageName, userId) }
 
     suspend fun wakeups(windowMs: Long): Reply<WakeupReport> = call(WakeupReport.serializer()) { it.wakeups(windowMs) }
+
+    /** PSS in kB; expensive, so only on explicit request. */
+    suspend fun pss(pid: Int): Reply<Long> = call(Long.serializer()) { it.pss(pid) }
 
     private fun currentUserId(): Int = android.os.Process.myUid() / Uids.PER_USER_RANGE
 
