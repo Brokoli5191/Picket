@@ -8,12 +8,19 @@ import android.os.SystemClock
 import android.system.Os
 import android.system.OsConstants
 import android.util.Log
+import app.brokoli5191.picket.core.action.Action
+import app.brokoli5191.picket.core.action.ActionOutcome
+import app.brokoli5191.picket.core.action.ActionPlan
+import app.brokoli5191.picket.core.action.ActionPlanner
+import app.brokoli5191.picket.core.action.ActionPolicy
+import app.brokoli5191.picket.core.action.ProtectedPackages
 import app.brokoli5191.picket.core.collect.AppDetailCollector
 import app.brokoli5191.picket.core.collect.WakeupsCollector
 import app.brokoli5191.picket.core.collect.WatchersCollector
 import app.brokoli5191.picket.core.command.CommandExecutor
 import app.brokoli5191.picket.core.command.CommandOutput
 import app.brokoli5191.picket.core.command.ReadCommands
+import app.brokoli5191.picket.core.command.SecureKey
 import app.brokoli5191.picket.core.command.ShellCommand
 import app.brokoli5191.picket.core.ipc.CallCost
 import app.brokoli5191.picket.core.ipc.PayloadCodec
@@ -24,9 +31,11 @@ import app.brokoli5191.picket.core.model.ProcessSnapshot
 import app.brokoli5191.picket.core.model.WakeupReport
 import app.brokoli5191.picket.core.model.WatchersSnapshot
 import app.brokoli5191.picket.core.parse.MeminfoParser
+import app.brokoli5191.picket.core.parse.SettingsLists
 import app.brokoli5191.picket.core.proc.ProcessSnapshotReader
 import app.brokoli5191.picket.core.validation.Validators
 import app.brokoli5191.picket.privileged.IPicketService
+import app.brokoli5191.picket.privileged.client.PrivilegedClient
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
 import java.io.File
@@ -117,6 +126,83 @@ class PicketUserService(
             commandsRun++
             val result = runner.run(command)
             MeminfoParser.totalPssKb(result.stdout) ?: throw IllegalStateException("No memory info for pid $pid")
+        }
+
+    private val ownPackage: String = context.packageName
+
+    /**
+     * Static list from the APK's assets, the same file the app shows in its protected-list viewer.
+     * Null if it cannot be read; disruptive actions are then refused for every package.
+     */
+    private val protectedPackages: ProtectedPackages? =
+        runCatching {
+            context.assets
+                .open("protected.json")
+                .bufferedReader()
+                .use { ProtectedPackages.parse(it.readText()) }
+        }.getOrNull()
+
+    /** Launcher, keyboard, Shizuku and Picket itself, resolved when an action is planned. */
+    private fun dynamicProtected(executor: CommandExecutor): Set<String> {
+        val launcher =
+            executor
+                .run(ReadCommands.homeActivity)
+                .stdout
+                .lineSequence()
+                .lastOrNull { '/' in it }
+                ?.substringBefore('/')
+                ?.trim()
+        val ime =
+            executor
+                .run(ReadCommands.secure(SecureKey.DEFAULT_INPUT_METHOD))
+                .stdout
+                .let(SettingsLists::singleComponent)
+                ?.packageName
+        return setOfNotNull(launcher, ime, ownPackage, PrivilegedClient.SHIZUKU_PACKAGE)
+    }
+
+    private fun enforceNotProtected(
+        action: Action,
+        executor: CommandExecutor,
+    ) {
+        if (!ActionPolicy.isDisruptive(action)) return
+        val list =
+            protectedPackages
+                ?: throw SecurityException("Protected list unreadable; refusing to stop, restrict or disable anything")
+        if (list.isProtected(action.packageName, dynamicProtected(executor))) {
+            throw SecurityException("${action.packageName} is protected; Picket will not stop, restrict or disable it")
+        }
+    }
+
+    override fun planAction(action: ByteArray?): ByteArray =
+        call(ActionPlan.serializer()) {
+            val bytes = action ?: throw IllegalArgumentException("No action")
+            val decoded = PayloadCodec.decode(Action.serializer(), bytes)
+            val executor = Executor(this)
+            ActionPolicy.validate(decoded)
+            enforceNotProtected(decoded, executor)
+            ActionPlanner(executor).plan(decoded)
+        }
+
+    override fun planDisableAccessibility(
+        packageName: String?,
+        userId: Int,
+        component: String?,
+    ): ByteArray =
+        call(ActionPlan.serializer()) {
+            val planner = ActionPlanner(Executor(this))
+            planner.disableAccessibilityService(packageName.orEmpty(), userId, component.orEmpty())
+        }
+
+    override fun executePlan(plan: ByteArray?): ByteArray =
+        call(ActionOutcome.serializer()) {
+            val bytes = plan ?: throw IllegalArgumentException("No plan")
+            val decoded = PayloadCodec.decode(ActionPlan.serializer(), bytes)
+            val executor = Executor(this)
+            ActionPolicy.validate(decoded.action)
+            enforceNotProtected(decoded.action, executor)
+            Log.i(TAG, "Executing ${decoded.command.display()}")
+            ActionPlanner(executor).execute(decoded)
         }
 
     override fun wakeups(windowMs: Long): ByteArray =
