@@ -33,4 +33,7 @@ interface IPicketService {
 
     /** Reply<WakeupReport>: totals since the last charge plus the events of the last [windowMs]. */
     byte[] wakeups(long windowMs) = 7;
+
+    /** Reply<Long>: proportional set size of one process in kB (expensive, on demand only). */
+    byte[] pss(int pid) = 8;
 }
