@@ -22,7 +22,8 @@ enum class StandbyBucket(
 
         fun fromShell(text: String): StandbyBucket? {
             val t = text.trim()
-            return t.toIntOrNull()?.let(::fromValue) ?: entries.firstOrNull { it.shellName.equals(t, ignoreCase = true) }
+            return t.toIntOrNull()?.let(::fromValue)
+                ?: entries.firstOrNull { it.shellName.equals(t, ignoreCase = true) }
         }
     }
 }
