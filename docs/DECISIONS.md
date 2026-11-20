@@ -276,3 +276,40 @@ exemptions need `sys-whitelist` (not offered in v1).
 - **Not done yet** (tracked for a follow-up): the shared-bounds transition from a list row to the
   app detail, `MorphPolygonShape` press morphs on custom containers, and `CapturedAnimatedVisibility`
   for appear/disappear. `ButtonGroup` already morphs its items on press.
+
+## D20 — Actions: plan, confirm, execute, journal (2026-11-20)
+
+- **Two binder calls per action.** `planAction` (or `planDisableAccessibility`) validates the typed
+  action inside the service, refuses protected packages, reads the current state, decides the
+  inverse and returns the exact argv. The app shows that argv, the inverse argv and the risk; only
+  after confirmation does it send the plan back to `executePlan`, which validates again, refuses again
+  if the package became protected, requires the argv to equal what `ActionPolicy.command` builds for
+  the action, and refuses if the state read at plan time has changed. A compromised or buggy client
+  can therefore not smuggle a different command through a plan. Rejected: one `execute(Action)` call
+  (no honest preview), and letting the app build argv (the service would have to trust it).
+- **`cmd <service>` instead of `am`/`pm`/`settings` wrappers.** The wrappers are shell scripts around
+  `cmd`; calling `cmd` directly is one process less and the argv is what the system service sees.
+  `scripts/device-checks.sh` runs the same argv, and a unit test fails if the two drift apart.
+- **Protected packages fail closed.** `assets/protected.json` (AOSP and Samsung core packages,
+  Knox and diagnostics prefixes) plus the launcher, keyboard, Shizuku and Picket itself, resolved at
+  plan and execute time. Stop, kill, stop service, background restriction, the rare/restricted
+  buckets and disabling are refused for them; if the file cannot be read these actions are refused
+  for every package. The Samsung part is a starting point until S23 results exist.
+- **Accessibility is edited as a whole value.** The service reads `enabled_accessibility_services`,
+  removes exactly one component (both the short and the full class form) and writes the rest back;
+  the inverse writes the previous value verbatim. `accessibility_enabled` is never written.
+- **One-tap undo, confirmed batch undo.** The specification asks for one-tap undo, so the snackbar
+  and the journal undo directly; the original confirmation and every journal row show the undo
+  command beforehand, and the service still re-plans the inverse against the current state. "Undo
+  all from this session" plans every inverse first and shows all commands in one confirmation.
+  Undoing a notification listener or accessibility revoke on Android 13+ mentions restricted
+  settings (the shell restores access that Settings would refuse for sideloaded apps).
+- **Journal** is a Room table with timestamp, session, action and inverse as JSON, argv as a JSON
+  array, the shell-quoted command, previous state, exit status, stdout, stderr and a note. Undo links
+  both rows (`undoOfId`/`undoneById`). Export goes through the Storage Access Framework, so Picket
+  needs no storage permission. The journal opens without the helper; only undo needs it.
+- **Fallbacks**: a failed action offers the matching Settings screen (or force stop after a failed
+  service stop); device admins, VPN and keyboards only get the Settings screen, because the shell
+  cannot remove a non-test device admin and the current keyboard is protected.
+- **Stop service** is only offered for started services: `stop-service` ends the started state, a
+  service that is only bound keeps running regardless.
