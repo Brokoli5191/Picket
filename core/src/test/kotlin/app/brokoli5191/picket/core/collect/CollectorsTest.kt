@@ -47,7 +47,7 @@ class CollectorsTest {
             byKind.getValue(WatcherKind.DND_ACCESS).map {
                 it.packageName
             },
-        ).containsExactly("com.example.notes", "com.android.settings")
+        ).containsExactly("com.example.notes", "com.google.android.apps.wellbeing")
         assertThat(snapshot.sources.all { it.ok }).isTrue()
     }
 
@@ -68,13 +68,35 @@ class CollectorsTest {
         val collector = WatchersCollector(broken)
         val snapshot = collector.collect()
         val failed = snapshot.sources.filterNot { it.ok }.associate { it.source to it.message }
-        assertThat(failed.keys).containsExactly("device admins", "active VPN", "live notification listeners")
+        assertThat(failed.keys)
+            .containsExactly("device admins", "active VPN", "live notification listeners", "Do Not Disturb access")
         assertThat(failed["device admins"]).contains("exit 255")
         assertThat(failed["active VPN"]).isEqualTo("timed out")
         assertThat(snapshot.entries.none { it.kind == WatcherKind.DEVICE_ADMIN }).isTrue()
         // Without the live list every approved listener counts as active.
         assertThat(snapshot.entries.filter { it.kind == WatcherKind.NOTIFICATION_LISTENER }.all { it.active }).isTrue()
         assertThat(collector.commandsRun).isGreaterThan(10)
+    }
+
+    @Test
+    fun `roles fall back to dumpsys role where get-role-holders does not exist`() {
+        val executor =
+            CommandExecutor { command ->
+                if ("get-role-holders" in command.argv) {
+                    CommandOutput(0, "Unknown command: get-role-holders\n")
+                } else {
+                    FixtureExecutor(aospMain).run(command)
+                }
+            }
+        val roles = WatchersCollector(executor).collect().entries.filter { it.kind == WatcherKind.DEFAULT_ROLE }
+        assertThat(roles.map { it.detail to it.packageName })
+            .containsExactly(
+                "sms" to "com.google.android.apps.messaging",
+                "dialer" to "com.google.android.dialer",
+                "assistant" to "com.google.android.googlequicksearchbox",
+                "browser" to "com.android.chrome",
+                "home" to "com.google.android.apps.nexuslauncher",
+            )
     }
 
     @Test

@@ -17,3 +17,7 @@ rule: argv without `/system/bin/`, joined with `_`.
 | `dumpsys_package_*` | `PackageManagerService` dump (`runtime permissions:` per user) |
 | `cmd_deviceidle_whitelist`, `dumpsys_power`, `am_get-standby-bucket_*` | `DeviceIdleController`, `PowerManagerService`, `ActivityManagerShellCommand` |
 | `dumpsys_alarm`, `dumpsys_jobscheduler`, `dumpsys_batterystats_-c_android` | `AlarmManagerService#dumpImpl`, `JobSchedulerService` (Job history), `BatteryStats#dumpCheckinLocked`; generated with Python ports of the AOSP formatters |
+
+Added from the AOSP research reports: `dumpsys_activity_services.txt` (users 0 and 10, API 35
+header with ` c:`, `startCommandResult` line), `dumpsys_meminfo_--checkin_12345.txt`,
+`dumpsys_role.txt` and `dumpsys_notification_--zen.txt` (condition providers section only).

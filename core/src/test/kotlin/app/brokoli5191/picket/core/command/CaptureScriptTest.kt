@@ -27,6 +27,8 @@ class CaptureScriptTest {
         listOf(
             ReadCommands.activityServices,
             ReadCommands.notification,
+            ReadCommands.notificationZen,
+            ReadCommands.roleDump,
             ReadCommands.devicePolicy,
             ReadCommands.vpnManagement,
             ReadCommands.alarm,

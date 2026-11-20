@@ -24,8 +24,19 @@ class ParsersTest {
     }
 
     @Test
-    fun `role holders and query-op`() {
+    fun `role holders, role dump, DND grants and query-op`() {
         assertThat(RoleHolders.parse("com.a;com.b\n")).containsExactly("com.a", "com.b").inOrder()
+        org.junit.Assert.assertThrows(UnsupportedOperationException::class.java) {
+            RoleHolders.parse("Unknown command: get-role-holders\n")
+        }
+        val dump = RoleHolders.parseDump(fixture("dumpsys_role.txt"), 10)
+        assertThat(dump["android.app.role.BROWSER"]).containsExactly("com.android.chrome")
+        assertThat(
+            RoleHolders.parseDump("user_id=0\nname=r\nholders=[\ncom.a\ncom.b\n]\nname=s\nholders=com.c;com.d\n", 0),
+        ).containsExactly("r", listOf("com.a", "com.b"), "s", listOf("com.c", "com.d"))
+        assertThat(NotificationDumpParser.dndAccessPackages(fixture("dumpsys_notification_--zen.txt"), 10))
+            .containsExactly("com.google.android.apps.wellbeing")
+        assertThat(NotificationDumpParser.dndAccessPackages("nothing", 0)).isEmpty()
         assertThat(RoleHolders.parse("\n")).isEmpty()
         assertThat(RoleHolders.parse("com.a;bad pkg")).containsExactly("com.a")
         assertThat(AppOpsParser.parseQueryOp("No operations.\n")).isEmpty()
@@ -128,6 +139,30 @@ class ParsersTest {
         assertThat(PackageDumpParser.parse(fixture("dumpsys_package_com.example.chat.txt"), "com.other")).isNull()
         val legacy = PackageDumpParser.parse("  Package [com.x] (1):\n    userId=10200\n", "com.x")!!
         assertThat(legacy.appId).isEqualTo(10_200)
+    }
+
+    @Test
+    fun `active services across releases and users`() {
+        val services = ActiveServicesParser.parse(fixture("dumpsys_activity_services.txt"))
+        assertThat(services.map { it.component to it.userId })
+            .containsExactly(
+                "com.example.notes/.sync.SyncForegroundService" to 0,
+                "com.example.notes/.audio.VoiceNotePlaybackService" to 0,
+                "com.example.notes/.api.NotesApiService" to 10,
+            ).inOrder()
+        val sync = services[0]
+        assertThat(sync.foreground).isTrue()
+        assertThat(ForegroundServiceTypes.decode(sync.foregroundTypes!!)).containsExactly("dataSync")
+        assertThat(sync.started).isTrue()
+        assertThat(sync.pid).isEqualTo(12345)
+        assertThat(services[2].bound).isTrue()
+        val api34 =
+            ActiveServicesParser.parse(
+                "  * ServiceRecord{1 u0 com.a/.S}\n    isForeground=true foregroundId=1 types=00000008\n",
+            )
+        assertThat(api34.single().foregroundTypes).isEqualTo(8)
+        assertThat(MeminfoParser.totalPssKb(fixture("dumpsys_meminfo_--checkin_12345.txt"))).isEqualTo(66_168)
+        assertThat(MeminfoParser.totalPssKb("time,1,2\n")).isNull()
     }
 
     @Test
