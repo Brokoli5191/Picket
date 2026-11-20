@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" width="1280" height="320" role="img" aria-labelledby="t d">
+  <title id="t">Picket</title>
+  <desc id="d">Three fence pickets on a rail, the tall middle one with an eye. What runs, what wakes, who reads along.</desc>
+  <rect width="1280" height="320" rx="24" fill="#12343B"/>
+  <g fill="#F2C14E" opacity="0.16">
+    <path d="M1096,280V214l9,-12l9,12V280Z"/><path d="M1126,280V188l9,-12l9,12V280Z"/><path d="M1156,280V172l9,-12l9,12V280Z"/><path d="M1186,280V202l9,-12l9,12V280Z"/><path d="M1216,280V184l9,-12l9,12V280Z"/>
+    <rect x="1088" y="236" width="150" height="8" rx="2"/>
+  </g>
+  <path fill="#F2C14E" d="M32,79L32,45L38,39L44,45L44,79Z M64,79L64,45L70,39L76,45L76,79Z M48,79L48,35L54,29L60,35L60,79Z M54,43.5a3.5,3.5 0 1 0 0,7a3.5,3.5 0 1 0 0,-7Z M30,59L78,59L78,64L30,64Z" transform="translate(-24 -56) scale(4)"/>
+  <g font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+    <text x="336" y="168" font-size="112" font-weight="700" letter-spacing="-2" fill="#F4F1E8">Picket</text>
+    <text x="340" y="222" font-size="34" font-weight="500" fill="#F4F1E8">What runs, what wakes, who reads along.</text>
+    <text x="340" y="262" font-size="22" fill="#B9CFCC">Android, through Shizuku. No root, no internet permission.</text>
+  </g>
+</svg>
