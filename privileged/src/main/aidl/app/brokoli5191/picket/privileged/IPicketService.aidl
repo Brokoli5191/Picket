@@ -24,4 +24,13 @@ interface IPicketService {
 
     /** Reply<ProcessSnapshot>: one sample of every process, read from /proc. */
     byte[] listProcesses() = 4;
+
+    /** Reply<WatchersSnapshot>: every app holding a privileged hook, for user [userId]. */
+    byte[] listWatchers(int userId) = 5;
+
+    /** Reply<AppDetail>: services, standby bucket, doze exemption, permissions, app-ops of one package. */
+    byte[] appDetail(String packageName, int userId) = 6;
+
+    /** Reply<WakeupReport>: totals since the last charge plus the events of the last [windowMs]. */
+    byte[] wakeups(long windowMs) = 7;
 }
