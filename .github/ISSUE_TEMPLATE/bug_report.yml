@@ -1,0 +1,70 @@
+name: Bug report
+description: Something in Picket is wrong, crashes, or shows data that does not match the device.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. Picket reads output that differs between Android versions and OEM
+        builds, so the device details below are what makes a report actionable.
+        **Security issues:** do not file them here. Use private vulnerability reporting (see SECURITY.md).
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: Manufacturer and model.
+      placeholder: Samsung Galaxy S23 (SM-S911B)
+    validations:
+      required: true
+  - type: input
+    id: android
+    attributes:
+      label: Android version and OEM skin
+      description: Settings → About phone → Software information.
+      placeholder: Android 16, One UI 8.0, security patch 2026-10-01
+    validations:
+      required: true
+  - type: dropdown
+    id: backend
+    attributes:
+      label: Privileged backend
+      options:
+        - Shizuku (started via wireless debugging)
+        - Shizuku (started via adb from a computer)
+        - Sui (root)
+        - Shizuku on a rooted device
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Picket version
+      description: Settings → About.
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Watchers
+        2. Tap …
+  - type: textarea
+    id: journal
+    attributes:
+      label: Exported journal (if an action was involved)
+      description: Settings → Journal → Export. Paste the JSON or attach the file. Remove anything you consider private.
+      render: json
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logcat (optional)
+      description: "`adb logcat -d | grep -i picket`"
+      render: text

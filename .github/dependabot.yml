@@ -1,0 +1,43 @@
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - maintenance
+    groups:
+      # Kotlin, its compiler plugins and KSP have to move together.
+      kotlin:
+        patterns:
+          - "org.jetbrains.kotlin*"
+          - "com.google.devtools.ksp*"
+      agp:
+        patterns:
+          - "com.android.*"
+      androidx:
+        patterns:
+          - "androidx.*"
+      test:
+        patterns:
+          - "junit:*"
+          - "com.google.truth:*"
+          - "app.cash.turbine:*"
+          - "org.robolectric:*"
+          - "io.github.takahirom.roborazzi*"
+      other:
+        patterns:
+          - "*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - maintenance
+    groups:
+      actions:
+        patterns:
+          - "*"
