@@ -1,0 +1,16 @@
+* text=auto eol=lf
+
+*.bat text eol=crlf
+gradlew text eol=lf
+*.sh text eol=lf
+
+*.jar binary
+*.png binary
+*.webp binary
+*.gif binary
+*.jks binary
+
+# Recorded device output (fixtures) is kept byte-exact: no EOL normalisation, no diffs on binary protos.
+core/src/test/resources/fixtures/** -text
+core/src/test/resources/fixtures/**/*.txt diff
+core/src/test/resources/fixtures/**/*.pb binary
