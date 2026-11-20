@@ -31,3 +31,4 @@ rootProject.name = "picket"
 include(":app")
 include(":core")
 include(":privileged")
+include(":testtarget")
