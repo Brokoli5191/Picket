@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Picket test target</string>
+    <string name="explanation">This app exists only for Picket\'s device checks (scripts/device-checks.sh). Its notification listener, accessibility service, device admin and services do nothing. Uninstall it when you are done.</string>
+    <string name="listener_label">Picket test listener (does nothing)</string>
+    <string name="accessibility_label">Picket test service (does nothing)</string>
+    <string name="accessibility_description">Test component for Picket device checks. It ignores every event it receives.</string>
+    <string name="admin_description">Test admin for Picket device checks. It uses no policies.</string>
+    <string name="channel_name">Device checks</string>
+    <string name="fgs_title">Picket device check running</string>
+</resources>
