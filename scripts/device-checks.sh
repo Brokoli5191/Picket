@@ -85,8 +85,6 @@ section "Install test target"
 # Original values of everything shared with the rest of the system, restored by cleanup().
 x settings get secure enabled_accessibility_services
 ORIG_A11Y="$OUT"
-x settings get secure accessibility_enabled
-ORIG_A11Y_ENABLED="$OUT"
 x cmd role get-role-holders --user "$USER_ID" "$ROLE"
 ORIG_BROWSER="$(printf '%s' "$OUT" | head -1)"
 
@@ -99,8 +97,6 @@ cleanup() {
   else
     x settings --user "$USER_ID" put secure enabled_accessibility_services "$ORIG_A11Y"
   fi
-  [[ -n "$ORIG_A11Y_ENABLED" && "$ORIG_A11Y_ENABLED" != "null" ]] &&
-    x settings --user "$USER_ID" put secure accessibility_enabled "$ORIG_A11Y_ENABLED"
   if [[ -n "$ORIG_BROWSER" && "$ORIG_BROWSER" != "$PKG" ]]; then
     x cmd role add-role-holder --user "$USER_ID" "$ROLE" "$ORIG_BROWSER"
   fi
@@ -153,14 +149,15 @@ start_target fgs
 x dumpsys activity services "$PKG"
 before="$(contains "$OUT" "DummyForegroundService" && echo running || echo absent)"
 x am stopservice --user "$USER_ID" -n "$FGS"
-rc=$RC
+rc=$RC # 255 for every outcome; the message decides
 stop_out="$(oneline "$OUT $ERR")"
 sleep 1
 x dumpsys activity services "$PKG"
 after="$(contains "$OUT" "DummyForegroundService" && echo running || echo absent)"
 verdict=FAIL
 [[ "$before" == running && "$after" == absent ]] && verdict=PASS
-row "Stop service" "am stopservice --user $USER_ID -n $FGS" "$rc" "$before → $after ($stop_out)" "–" "–" "$verdict" "fallback: force stop"
+[[ "$stop_out" == *"Service stopped"* ]] || verdict=FAIL
+row "Stop service" "am stopservice --user $USER_ID -n $FGS" "$rc" "$before → $after ($stop_out)" "–" "–" "$verdict" "exit is 255 even on success; only exported services; fallback: force stop"
 x am force-stop "$PKG"
 
 # ---- 4. restrict background execution ---------------------------------------------------------------
@@ -226,7 +223,6 @@ section "Accessibility service"
 with_target="$A11Y"
 [[ -n "$ORIG_A11Y" && "$ORIG_A11Y" != "null" ]] && with_target="$ORIG_A11Y:$A11Y"
 x settings --user "$USER_ID" put secure enabled_accessibility_services "$with_target"
-x settings --user "$USER_ID" put secure accessibility_enabled 1
 sleep 2
 x dumpsys accessibility
 before="$(contains "$OUT" "DummyAccessibilityService" && echo bound || echo unbound)"
@@ -330,7 +326,10 @@ row "Remove default role holder" "cmd role remove-role-holder --user $USER_ID $R
 
 # ---- 12. notification policy (DND) access ------------------------------------------------------------
 section "DND access"
-dnd_state() { x settings get secure enabled_notification_policy_access_packages; contains "$OUT" "$PKG" && echo granted || echo absent; }
+dnd_state() {
+  x dumpsys notification --zen
+  printf '%s' "$OUT" | grep -E "^\s+.* \(user: $USER_ID isPrimary: true" | grep -q "$PKG" && echo granted || echo absent
+}
 x cmd notification allow_dnd "$PKG" "$USER_ID"
 before="$(dnd_state)"
 x cmd notification disallow_dnd "$PKG" "$USER_ID"
@@ -342,7 +341,7 @@ restored="$(dnd_state)"
 verdict=FAIL
 [[ $rc -eq 0 && "$before" == granted && "$after" == absent && "$restored" == granted ]] && verdict=PASS
 row "Revoke DND access" "cmd notification disallow_dnd $PKG $USER_ID" "$rc" "$before → $after" \
-  "\`allow_dnd\` (exit $inv_rc)" "$restored" "$verdict" "state read from settings"
+  "\`allow_dnd\` (exit $inv_rc)" "$restored" "$verdict" "state read from dumpsys notification --zen"
 
 # ---- 13. disable app for user ------------------------------------------------------------------------
 section "Disable for user"
@@ -359,6 +358,15 @@ verdict=FAIL
 [[ $rc -eq 0 && "$before" == enabled && "$after" == disabled && "$restored" == enabled ]] && verdict=PASS
 row "Disable app for user" "pm disable-user --user $USER_ID $PKG" "$rc" "$before → $after ($disable_out)" \
   "\`pm enable --user $USER_ID\` (exit $inv_rc)" "$restored" "$verdict" ""
+x pm disable-user --user "$USER_ID" "$PKG"
+x pm default-state --user "$USER_ID" "$PKG"
+inv_rc=$RC
+default_out="$(oneline "$OUT $ERR")"
+restored="$(disabled)"
+verdict=FAIL
+[[ $inv_rc -eq 0 && "$restored" == enabled ]] && verdict=PASS
+row "Disable app for user (exact inverse)" "pm disable-user --user $USER_ID $PKG" "–" "disabled" \
+  "\`pm default-state --user $USER_ID\` (exit $inv_rc, $default_out)" "$restored" "$verdict" "restores the default state instead of an explicit enable"
 
 # ---- 14. device admin --------------------------------------------------------------------------------
 section "Device admin"

@@ -138,6 +138,8 @@ for key in enabled_notification_listeners enabled_notification_policy_access_pac
   capture filter_default settings get secure "$key"
 done
 capture filter_default dumpsys notification
+capture filter_default dumpsys notification --zen
+capture filter_default dumpsys role
 capture filter_default dumpsys accessibility
 capture filter_default dumpsys device_policy
 capture filter_default ime list -s
