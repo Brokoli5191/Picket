@@ -14,13 +14,16 @@ Application id and root package: `app.brokoli5191.picket` (permanent, never chan
 ./gradlew verifyRoborazziDebug                  # compare screenshots
 ./gradlew spotlessApply                         # format; spotlessCheck in CI
 ./gradlew verifyNoInternetPermission            # merged manifests must not request INTERNET
+scripts/release-dry-run.sh 0.1.0-rc1            # release build + checks with a throwaway key
+./gradlew :app:generateBaselineProfile          # needs KVM (managed emulator); CI: baseline-profile.yml
 ```
 
 Full CI set (run before pushing):
 
 ```sh
 ./gradlew spotlessCheck lint testDebugUnitTest :core:test :core:koverVerify \
-          verifyRoborazziDebug assembleDebug verifyNoInternetPermission
+          verifyRoborazziDebug assembleDebug verifyNoInternetPermission \
+          :baselineprofile:compileBenchmarkReleaseKotlin
 ```
 
 Long Gradle runs: start them in the background and poll. `org.gradle.jvmargs=-Xmx4g`.
@@ -34,6 +37,9 @@ Long Gradle runs: start them in the background and poll. `org.gradle.jvmargs=-Xm
 - `:app` — UI (`ui/`, experimental Expressive APIs only in `ui/expressive/`), data layer, Room
   journal, DataStore settings, `AppContainer` (manual DI).
 - `:testtarget` — dummy app used by `scripts/device-checks.sh` only.
+- `:baselineprofile` — Baseline Profile generator and Macrobenchmarks (startup, list scrolling) for
+  the `benchmarkRelease`/`nonMinifiedRelease` builds, which are debug-signed with the id
+  `app.brokoli5191.picket.benchmark`.
 
 ## Hard rules
 
