@@ -102,3 +102,87 @@ sensitive) on another one.
 The repository was empty, without a `main` branch. `main` was created with a minimal bootstrap
 commit so that pull requests have a base and `release.yml` (dispatch from the default branch) can
 work later. Each milestone then lives on its own branch with its own PR.
+
+## D9 — How the privileged service gets its data (2026-11-20)
+
+**Context.** The brief asks to weigh binder calls through `ShizukuBinderWrapper` (hidden APIs,
+HiddenApiRefinePlugin) against shell commands and to prefer machine-readable output.
+
+**Evaluation.**
+- *Hidden-API binder calls* (`IActivityManager`, `IAppOpsService`, `INotificationManager`, ...) give typed
+  results, but their signatures change between API levels and OEM builds (Samsung patches several of
+  these services), each call needs compile-time stubs plus a reflection fallback, and what the
+  call returns for the shell uid is not documented anywhere. Every one of them would need its own
+  device matrix.
+- *Shell commands* (`dumpsys`, `cmd`, `settings`, `pm`) are what Android's own tooling and adb users
+  rely on, are reachable from the shell uid by design, and can be recorded as fixtures with adb
+  alone. Their text output is the weak point; the fixture tree is the regression net.
+- */proc* is a kernel ABI, stable and cheap, and the shell uid can read it for every process (it is
+  what `ps` does).
+
+**Choice for v1.**
+- Processes: read /proc directly inside the UserService (no fork per sample).
+- Everything else: fixed shell commands executed inside the UserService as argv arrays
+  (`ProcessBuilder`, absolute `/system/bin/...` paths, no `sh -c`), parsed there by the `:core` parsers.
+  `--checkin`/`--proto` variants are used where they exist and carry the needed fields (decided per
+  data source in D16+ once the AOSP research and device fixtures are in).
+- No hidden-API binder calls and no HiddenApiRefinePlugin in v1. Revisit per data source if a shell
+  command turns out to be unusable on One UI.
+
+**Rejected.** `Shizuku.newProcess` (deprecated, and it would put arbitrary command execution on the
+app side); running parsers in the app (raw `dumpsys` output can exceed the binder buffer and contains
+notification text that the app does not need to see).
+
+## D10 — Binder payload format (2026-11-20)
+
+Every AIDL method returns `byte[]` = gzip(JSON(`Reply<T>`)) built by `PayloadCodec` in `:core`.
+`Reply` carries either a value or a typed `ServiceError` plus the call cost for the debug overlay.
+
+- Typed per method: the result type is fixed by the method (documented in `IPicketService.aidl`)
+  and decoded with that type's serializer on the client.
+- Small: a 700-process snapshot is ≈ 30 KB compressed; payloads above 512 KB compressed are refused
+  (binder transactions share a 1 MB buffer per process). Decompression is capped at 32 MB.
+- Strict: unknown JSON keys are rejected; `PROTOCOL_VERSION` is checked on connect.
+
+**Rejected.** Hand-written Parcelables mirroring every `:core` model (duplication, and models must stay
+Android-free); `ParcelFileDescriptor` pipes (fd passing from the shell domain to the app domain adds
+SELinux surface for no gain once results are parsed service-side).
+
+## D11 — CPU and memory numbers (2026-11-20)
+
+- CPU % is the share of the whole machine between two samples: Δ(utime+stime) of the process divided
+  by Δ(total ticks of the aggregate `cpu` line of /proc/stat). 100 % = every online core busy
+  (Sysinternals convention). `top` would show the same process as up to `cores × 100 %`.
+- guest/guest_nice are not added to the total; the kernel already counts them in user/nice.
+- RSS comes from field 24 of `/proc/<pid>/stat` (pages × page size). It is the same counter as `VmRSS`
+  in `/proc/<pid>/status` but saves a read per process per sample; status is read only for the uid
+  (cached per pid + start time together with cmdline, refreshed every 15 samples).
+- A process instance is `(pid, start time)`, so recycled pids never inherit CPU history.
+- PSS is not sampled; it is fetched on demand only (shell cannot read other apps' `smaps_rollup`).
+
+## D12 — Importance classes (2026-11-20)
+
+Derived from `oom_score_adj` in bands (`<0` system, `<100` foreground, `<200` visible, `<300`
+perceptible, `<900` service/home/previous, `≤1000` cached). The constants inside the bands moved
+between releases, the band edges did not. **To verify on device:** that the shell uid can read
+`/proc/<pid>/oom_score_adj` of app processes; the fallback is the adj column of
+`dumpsys activity lru`.
+
+## D13 — Service lifecycle and caller checks (2026-11-20)
+
+- `UserServiceArgs.daemon(false)`: the privileged process dies with the app; nothing privileged stays
+  resident. `processNameSuffix("privileged")`.
+- `version` = APK `lastUpdateTime` in seconds, so every install or update restarts a running
+  service (versionCode is constant for local builds).
+- The service takes the `(Context)` constructor; `context.applicationInfo.uid` is Picket's uid and
+  every method rejects other callers (the Shizuku server's own uid is allowed for `destroy()`).
+- Every operation runs under one lock (the snapshot reader keeps a cache), every exception becomes a
+  typed `ServiceError`, and only `SecurityException` from the caller check crosses the binder as such.
+- Sui is detected with `Sui.isSui()`; `ShizukuProvider` initialises Sui automatically.
+
+## D14 — Polling instead of a callback stream (2026-11-20)
+
+The process list polls (`listProcesses()` every 2 s, pausable) and diffs consecutive snapshots in the
+app. A callback interface from the service would need a second AIDL interface, death handling in
+both directions and back-pressure, for no gain at a 2 s cadence. The sampler flow only runs while
+the screen collects it, and stops when Shizuku disconnects.
