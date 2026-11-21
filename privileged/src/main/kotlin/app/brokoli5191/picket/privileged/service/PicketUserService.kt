@@ -8,14 +8,27 @@ import android.os.SystemClock
 import android.system.Os
 import android.system.OsConstants
 import android.util.Log
+import app.brokoli5191.picket.core.collect.AppDetailCollector
+import app.brokoli5191.picket.core.collect.WakeupsCollector
+import app.brokoli5191.picket.core.collect.WatchersCollector
+import app.brokoli5191.picket.core.command.CommandExecutor
+import app.brokoli5191.picket.core.command.CommandOutput
+import app.brokoli5191.picket.core.command.ReadCommands
+import app.brokoli5191.picket.core.command.ShellCommand
 import app.brokoli5191.picket.core.ipc.CallCost
 import app.brokoli5191.picket.core.ipc.PayloadCodec
 import app.brokoli5191.picket.core.ipc.Reply
 import app.brokoli5191.picket.core.ipc.ServiceError
+import app.brokoli5191.picket.core.model.AppDetail
 import app.brokoli5191.picket.core.model.ProcessSnapshot
+import app.brokoli5191.picket.core.model.WakeupReport
+import app.brokoli5191.picket.core.model.WatchersSnapshot
+import app.brokoli5191.picket.core.parse.MeminfoParser
 import app.brokoli5191.picket.core.proc.ProcessSnapshotReader
+import app.brokoli5191.picket.core.validation.Validators
 import app.brokoli5191.picket.privileged.IPicketService
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.serializer
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -64,11 +77,51 @@ class PicketUserService(
         return runCatching { File("/proc/self/attr/current").readText().trim('\u0000', '\n', ' ') }.getOrDefault("")
     }
 
+    private val runner = CommandRunner()
+
+    /** Executes the fixed read commands of the :core collectors; counts them for the debug overlay. */
+    private inner class Executor(
+        private val scope: CallScope,
+    ) : CommandExecutor {
+        override fun run(command: ShellCommand): CommandOutput {
+            scope.commandsRun++
+            val result = runner.run(command)
+            return CommandOutput(result.exitCode, result.stdout, result.stderr, result.timedOut)
+        }
+    }
+
     override fun listProcesses(): ByteArray =
         call(ProcessSnapshot.serializer()) {
             val snapshot = processReader.snapshot()
             filesRead = processReader.lastFilesRead
             snapshot
+        }
+
+    override fun listWatchers(userId: Int): ByteArray =
+        call(WatchersSnapshot.serializer()) {
+            WatchersCollector(Executor(this), Validators.requireUserId(userId)).collect()
+        }
+
+    override fun appDetail(
+        packageName: String?,
+        userId: Int,
+    ): ByteArray =
+        call(AppDetail.serializer()) {
+            val pkg = Validators.requirePackageName(packageName.orEmpty())
+            AppDetailCollector(Executor(this)).collect(pkg, Validators.requireUserId(userId))
+        }
+
+    override fun pss(pid: Int): ByteArray =
+        call(Long.serializer()) {
+            val command = ReadCommands.meminfo(pid)
+            commandsRun++
+            val result = runner.run(command)
+            MeminfoParser.totalPssKb(result.stdout) ?: throw IllegalStateException("No memory info for pid $pid")
+        }
+
+    override fun wakeups(windowMs: Long): ByteArray =
+        call(WakeupReport.serializer()) {
+            WakeupsCollector(Executor(this), System::currentTimeMillis).collect(windowMs)
         }
 
     /** Mutable cost counters an operation fills in while it runs. */

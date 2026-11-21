@@ -1,0 +1,136 @@
+Current Alarm Manager state:
+  App Standby Parole: false
+  
+  nowRTC=1795185000000=2026-11-20 14:30:00.000 nowELAPSED=273906789
+  mLastTimeChangeClockTime=1794911101876=2026-11-17 10:25:01.876
+  mLastTimeChangeRealtime=8665
+  mLastTickReceived=2026-11-20 14:29:18.001
+  mLastTickSet=2026-11-20 14:29:18.005
+  
+  Recent TIME_TICK history:
+    2026-11-20 14:29:17.999
+    2026-11-20 14:28:17.999
+    2026-11-20 14:27:17.999
+    2026-11-20 14:26:17.999
+    2026-11-20 14:25:17.999
+    2026-11-20 14:24:17.999
+    2026-11-20 14:23:17.999
+    2026-11-20 14:22:17.999
+    2026-11-20 14:21:17.999
+    2026-11-20 14:20:17.999
+  
+  RuntimeStarted=2026-11-17 10:25:00.223
+  Runtime uptime (elapsed): +3d4h4m59s777ms
+  Runtime uptime (uptime): +17h0m27s577ms
+  
+  Time since non-interactive: +17m15s0ms
+  Max wakeup delay: +15m0s0ms
+  Time since last dispatch: +42s1ms
+  Next non-wakeup delivery time: --
+  Next non-wakeup alarm: +17s999ms = 273924788 = 2026-11-20 14:30:17.999
+    set at -42s1ms
+  Next wakeup alarm: +17m3s111ms = 274929900 = 2026-11-20 14:47:03.111
+    set at -3m1s2ms
+  Next kernel non-wakeup alarm: +17s999ms
+  Next kernel wakeup alarm: +17m3s111ms
+  Last wakeup: -42s1ms = 273864788
+  Last trigger: -42s1ms = 273864788
+  Num time change events: 1
+  
+  Pending alarms per uid: [1000:41, u0a50:3, u0a123:4, u0a146:22, u0a201:1]
+  
+  App Alarm history:
+    com.google.android.gms, u0: -10m12s340ms, -25m0s12ms, -40m12s338ms, -1h10m12s1ms, 
+    com.google.android.gsf, u0: -50m2s111ms, 
+    com.example.chat, u0: -3m1s2ms, -18m2s3ms, -33m1s2ms, -48m1s9ms, -1h3m0s500ms, 
+    com.example.weather, u0: -59m2s1ms, 
+    com.android.systemui, u0: -17m55s2ms, 
+  
+  Temporary Quota Reserves:
+  
+  Next wake from idle: Alarm{7c1a3f2 type 2 origWhen 274929900 whenElapsed 274929900 com.google.android.gms}
+    tag=*walarm*:com.google.android.gms.location.ALARM_WAKEUP_BURST_COLLECTOR
+    type=ELAPSED_WAKEUP origWhen=+17m3s111ms window=0 exactAllowReason=allow-listed repeatInterval=0 count=0 flags=0xb
+    policyWhenElapsed: requester=+17m3s111ms app_standby=-3m1s2ms device_idle=-3m1s2ms battery_saver=-3m1s2ms
+    whenElapsed=+17m3s111ms maxWhenElapsed=+17m3s111ms
+    operation=PendingIntent{3be81d0: PendingIntentRecord{f12a9c4 com.google.android.gms broadcastIntent}}
+  
+  Past-due non-wakeup alarms: 1
+    ELAPSED #1: Alarm{a90b11e type 3 origWhen 273845787 whenElapsed 273845787 com.example.chat}
+      tag=*alarm*:com.example.chat.UI_REFRESH
+      type=ELAPSED origWhen=-1m1s2ms window=+15m0s0ms repeatInterval=900000 count=0 flags=0x0
+      policyWhenElapsed: requester=-1m1s2ms app_standby=-3m1s2ms device_idle=-3m1s2ms battery_saver=-3m1s2ms
+      whenElapsed=-1m1s2ms maxWhenElapsed=+13m58s998ms
+      operation=PendingIntent{1d0c55b: PendingIntentRecord{8e2f6a7 com.example.chat broadcastIntent}}
+    Number of delayed alarms: 312, total delay time: +14h13m54s567ms
+    Max delay time: +59m59s1ms, max non-interactive time: +8h0m0s123ms
+  
+  Broadcast ref count: 0
+  PendingIntent send count: 5512
+  PendingIntent finish count: 5512
+  Listener send count: 5843
+  Listener finish count: 5843
+  
+  Allow while idle history:
+    com.google.android.gms, u0: -46m3s101ms, 
+  
+  Allow while idle compat history:
+  
+  Top Alarms:
+    +1m2s3ms running, 288 wakeups, 288 alarms: u0a123:com.example.chat
+      *walarm*:com.example.chat.ACTION_KEEPALIVE
+    +48s123ms running, 304 wakeups, 304 alarms: u0a201:com.example.weather
+      *walarm*:com.example.weather.REFRESH
+    +20s112ms running, 0 wakeups, 4565 alarms: 1000:android
+      *alarm*:android.intent.action.TIME_TICK
+    +15s210ms running, 101 wakeups, 101 alarms: u0a146:com.google.android.gms
+      *walarm*:com.google.android.location.ALARM_WAKEUP_LOCATOR
+    +12s1ms running, 61 wakeups, 61 alarms: u0a123:com.example.chat
+      *walarm*:com.example.chat/.push.ReconnectReceiver
+    +9s30ms running, 74 wakeups, 74 alarms: u0a146:com.google.android.gms
+      *walarm*:com.google.android.gms.gcm.ACTION_CHECK_QUEUE
+    +7s2ms running, 59 wakeups, 59 alarms: u0a146:com.google.android.gms
+      *walarm*:com.google.android.gms.nlp.ALARM_WAKEUP_ACTIVITY_DETECTION
+    +4s120ms running, 20 wakeups, 20 alarms: u0a146:com.google.android.gsf
+      *walarm*:com.google.android.intent.action.MCS_HEARTBEAT
+    +2s1ms running, 412 wakeups, 412 alarms: 1000:android
+      *walarm*:*job.deadline*
+    +1s530ms running, 0 wakeups, 41 alarms: u0a123:com.example.chat
+      *alarm*:com.example.chat.UI_REFRESH
+  
+  Alarm Stats:
+  1000:android +24s871ms running, 764 wakeups:
+    +20s112ms 0 wakes 4565 alarms, last -42s1ms:
+      *alarm*:android.intent.action.TIME_TICK
+    +2s1ms 412 wakes 412 alarms, last -2m3s4ms:
+      *walarm*:*job.deadline*
+    +1s210ms 31 wakes 31 alarms, last -46m3s1ms:
+      *walarm*:DeviceIdleController.deep
+    +1s5ms 233 wakes 233 alarms, last -15m1s233ms:
+      *walarm*:*job.delay*
+    +903ms 88 wakes 88 alarms, last -6m1s3ms:
+      *walarm*:DeviceIdleController.light
+  u0a50:com.android.systemui +612ms running, 9 wakeups:
+    +612ms 9 wakes 9 alarms, last -17m55s2ms:
+      *walarm*:com.android.internal.policy.impl.PhoneWindowManager.DELAYED_KEYGUARD
+  u0a123:com.example.chat +1m14s120ms running, 349 wakeups:
+    +1m2s3ms 288 wakes 288 alarms, last -3m1s2ms:
+      *walarm*:com.example.chat.ACTION_KEEPALIVE
+    +12s1ms 61 wakes 61 alarms, last -1h12m3s5ms:
+      *walarm*:com.example.chat/.push.ReconnectReceiver
+    +1s530ms 0 wakes 41 alarms, last -2h0m1s230ms:
+      *alarm*:com.example.chat.UI_REFRESH
+  u0a146:com.google.android.gms +30s112ms running, 234 wakeups:
+    +15s210ms 101 wakes 101 alarms, last -10m12s340ms:
+      *walarm*:com.google.android.location.ALARM_WAKEUP_LOCATOR
+    +9s30ms 74 wakes 74 alarms, last -1h30m0s123ms:
+      *walarm*:com.google.android.gms.gcm.ACTION_CHECK_QUEUE
+    +7s2ms 59 wakes 59 alarms, last -25m0s12ms:
+      *walarm*:com.google.android.gms.nlp.ALARM_WAKEUP_ACTIVITY_DETECTION
+  u0a146:com.google.android.gsf +4s120ms running, 20 wakeups:
+    +4s120ms 20 wakes 20 alarms, last -50m2s111ms:
+      *walarm*:com.google.android.intent.action.MCS_HEARTBEAT
+  u0a201:com.example.weather +48s123ms running, 304 wakeups:
+    +48s123ms 304 wakes 304 alarms, last -59m2s1ms:
+      *walarm*:com.example.weather.REFRESH
+  

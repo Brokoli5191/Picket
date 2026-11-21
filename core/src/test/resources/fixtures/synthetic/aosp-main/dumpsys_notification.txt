@@ -1,0 +1,21 @@
+Current Notification Manager state:
+  Notification List:
+    NotificationRecord(0x0a1b2c3d: pkg=com.example.chat user=UserHandle{0} id=1 tag=null importance=3 key=0|com.example.chat|1|null|10123)
+      uid=10123 userId=0
+      extras={
+        android.title=String (5)
+        android.text=String (42)
+      }
+
+  Notification listeners:
+    Allowed notification listeners:
+      com.example.notes/com.example.notes.NoteListener:com.google.android.gms/.nearby.exposurenotification.WakeUpService (user: 0 isPrimary: true isUserChanged: true)
+    Has user set:
+    All notification listeners (2) enabled for current profiles:
+      ComponentInfo{com.example.notes/com.example.notes.NoteListener}
+      ComponentInfo{com.google.android.gms/com.google.android.gms.nearby.exposurenotification.WakeUpService}
+    Live notification listeners (1):
+      ComponentInfo{com.example.notes/com.example.notes.NoteListener} (user 0): android.service.notification.INotificationListener$Stub$Proxy@4c1d2e3 
+
+  Notification assistant services:
+    Allowed notification assistant services:

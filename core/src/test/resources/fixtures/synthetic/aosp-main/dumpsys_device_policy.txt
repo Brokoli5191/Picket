@@ -1,0 +1,32 @@
+Current Device Policy Manager state:
+  Immutable state:
+    mHasFeature=true
+    mIsWatch=false
+    mSafetyChecker=null
+  Device Owner: 
+    admin=ComponentInfo{com.example.mdm/com.example.mdm.AdminReceiver}
+    name=
+    package=com.example.mdm
+    isOrganizationOwnedDevice=true
+  User ID: 0
+
+  Enabled Device Admins (User 0, provisioningState: 3):
+    com.example.mdm/.AdminReceiver:
+      uid=10301
+      testOnlyAdmin=false
+      policies:
+        wipe-data
+        force-lock
+    com.google.android.gms/.mdm.receivers.MdmDeviceAdminReceiver:
+      uid=10146
+      testOnlyAdmin=false
+      policies:
+        wipe-data
+    mPasswordOwner=-1
+
+  Enabled Device Admins (User 10, provisioningState: 3):
+    com.example.work/.WorkAdmin:
+      uid=1010320
+      testOnlyAdmin=false
+
+  mPasswordOwner=-1
