@@ -251,3 +251,28 @@ message decides), `am force-stop`/`am kill` exit 0 even for unknown packages, `c
 reports errors on stdout with exit 0, `accessibility_enabled` is recomputed by the system and is
 never written, `pm default-state` is the exact inverse of `pm disable-user`, and system doze
 exemptions need `sys-whitelist` (not offered in v1).
+
+## D19 — UI structure and the motion budget (2026-11-20)
+
+- **Navigation 3** (`navigation3` 1.2.2) with a single back stack; the four top-level destinations
+  sit in a `NavigationSuiteScaffold` (bar on phones, rail on wider windows). Processes, Watchers and
+  Wakeups are list panes and the app detail is a detail pane of the Material 3 adaptive
+  `ListDetailSceneStrategy`, so wide windows show list and detail side by side. Predictive back comes
+  from `NavDisplay`.
+- **Experimental APIs** live in `ui/expressive/` only: `MaterialExpressiveTheme`, `MotionScheme`
+  factories, `LoadingIndicator`, `MaterialShapes` and the adaptive list-detail strategy. Flexible top
+  app bars, `SegmentedListItem`, `ButtonGroup`, `FloatingToolbar` and the collapsing scroll behaviour
+  are stable in Material 3 1.5.0 and are used directly.
+- **Motion**: Full = expressive motion scheme; Reduced = standard scheme and no digit rolls; Off = a
+  `MotionScheme` whose specs all snap. "Follow system" maps an animator duration scale of 0
+  ("Remove animations") to Reduced. Live numbers use tabular figures and roll vertically on the
+  scheme's spatial and effects springs. Lists re-sort at most every 5 s and never while a finger is on
+  the list or it scrolls; items animate with `animateItem()`. The loading indicator appears only after
+  300 ms.
+- **Colour**: dynamic colour follows the platform roles (which already follow the system contrast);
+  an explicit contrast with dynamic colour rebuilds the scheme from the wallpaper's primary colour.
+- **Screenshots**: Roborazzi renders every main screen from fake data in light, dark, high contrast
+  and pure black, plus Processes and Watchers at 200 % font scale (`docs/screenshots/`).
+- **Not done yet** (tracked for a follow-up): the shared-bounds transition from a list row to the
+  app detail, `MorphPolygonShape` press morphs on custom containers, and `CapturedAnimatedVisibility`
+  for appear/disappear. `ButtonGroup` already morphs its items on press.
