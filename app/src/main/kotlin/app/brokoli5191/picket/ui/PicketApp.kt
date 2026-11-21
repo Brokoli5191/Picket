@@ -2,6 +2,7 @@ package app.brokoli5191.picket.ui
 
 import android.content.Intent
 import android.os.Build
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Icon
@@ -105,7 +106,7 @@ fun PicketApp(onOpenShizuku: () -> Unit) {
                 entryProvider =
                     entryProvider {
                         entry<ProcessesRoute>(metadata = listPaneMetadata()) {
-                            Privileged(onOpenShizuku) {
+                            Privileged(R.string.nav_processes, onOpenShizuku) {
                                 val vm: ProcessesViewModel = viewModel(factory = AppViewModels.factory(container))
                                 val state by vm.state.collectAsStateWithLifecycle()
                                 ProcessesScreen(
@@ -125,14 +126,14 @@ fun PicketApp(onOpenShizuku: () -> Unit) {
                             }
                         }
                         entry<AppDetailRoute>(metadata = detailPaneMetadata()) { route ->
-                            Privileged(onOpenShizuku) {
+                            Privileged(R.string.app_name, onOpenShizuku) {
                                 val vm: AppDetailViewModel =
                                     viewModel(factory = AppViewModels.detailFactory(container, route))
                                 AppDetailEntry(vm, onBack = { backStack.remove(route) })
                             }
                         }
                         entry<WatchersRoute>(metadata = listPaneMetadata()) {
-                            Privileged(onOpenShizuku) {
+                            Privileged(R.string.nav_watchers, onOpenShizuku) {
                                 val vm: WatchersViewModel = viewModel(factory = AppViewModels.factory(container))
                                 val state by vm.state.collectAsStateWithLifecycle()
                                 WatchersScreen(state, onOpenApp = {
@@ -144,7 +145,7 @@ fun PicketApp(onOpenShizuku: () -> Unit) {
                             }
                         }
                         entry<WakeupsRoute>(metadata = listPaneMetadata()) {
-                            Privileged(onOpenShizuku) {
+                            Privileged(R.string.nav_wakeups, onOpenShizuku) {
                                 val vm: WakeupsViewModel = viewModel(factory = AppViewModels.factory(container))
                                 val state by vm.state.collectAsStateWithLifecycle()
                                 WakeupsScreen(state, vm::setWindow, onOpenApp = {
@@ -202,6 +203,7 @@ private fun openDetail(
 /** Shows the connection screen instead of [content] until the privileged service is connected. */
 @Composable
 private fun Privileged(
+    @StringRes title: Int,
     onOpenShizuku: () -> Unit,
     content: @Composable () -> Unit,
 ) {
@@ -213,9 +215,10 @@ private fun Privileged(
         Box(Modifier.fillMaxSize()) {
             ConnectionScreen(
                 state = connection,
+                title = title,
                 onRequestPermission = client::requestPermission,
                 onOpenShizuku = onOpenShizuku,
-                onRetry = client::evaluate,
+                onRetry = client::reconnect,
             )
         }
     }

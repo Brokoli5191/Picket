@@ -22,6 +22,7 @@
     <string name="connection_action_grant">Allow</string>
     <string name="connection_action_open_shizuku">Open Shizuku</string>
     <string name="connection_action_retry">Try again</string>
+    <string name="connection_slow">This is taking longer than usual. Starting over usually helps; if it does not, stop and start Shizuku again.</string>
     <string name="connection_why">Why Shizuku? Android hides other apps\' processes, services and privileged settings from normal apps. Shizuku lends Picket the same rights you have in an adb shell, without rooting the phone.</string>
 
     <!-- Processes -->

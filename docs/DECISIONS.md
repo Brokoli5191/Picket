@@ -360,3 +360,19 @@ exemptions need `sys-whitelist` (not offered in v1).
 - Rejected: generating the key in a cloud session or a workflow. The key would pass through a
   transcript or a runner, and the maintainer would have no copy: secrets cannot be read back, and
   an APK signed with a lost key can never be installed as an update over an existing Picket.
+
+## D23 — A deadline for connecting to the helper (2026-11-21)
+
+- **Symptom (rc1 on the S23):** the app sometimes stayed on "Connecting…" until it was restarted.
+- **Cause:** `bind()` set `bindRequested` and waited for `onServiceConnected`. When that callback
+  never came (helper process died while starting, bind request lost), every later `evaluate()`,
+  including the one on each resume, returned early because a bind was "already requested". A failed
+  handshake left the flag set as well, so "Try again" did nothing either.
+- **Fix:** every bind arms a 10 s watchdog. If the helper is not connected by then, the binding is
+  dropped with `unbindUserService(remove = true)` (which also ends a half-started helper) and
+  retried once; after that the screen shows a failure with "Try again", which calls `reconnect()`
+  and always starts from scratch. Each attempt carries a number, so a late handshake of an
+  abandoned attempt is ignored; any exception in the handshake becomes a failure instead of a crash.
+  After four seconds of "Connecting…" the screen already offers "Try again".
+- Rejected: shortening the wait to a few seconds (a cold helper start on a busy phone can take
+  several), and retrying forever (it hides a broken Shizuku setup behind a spinner).
