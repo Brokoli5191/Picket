@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/Brokoli5191/Picket/security/advisories/new
+    about: Picket runs with shell privileges. Please report vulnerabilities privately, not as issues.
+  - name: Device results for command verification
+    url: https://github.com/Brokoli5191/Picket/blob/main/CONTRIBUTING.md#device-verification
+    about: How to run scripts/capture-fixtures.sh and scripts/device-checks.sh and share the output.
