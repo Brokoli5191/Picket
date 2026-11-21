@@ -616,3 +616,42 @@ object SampleData {
             ),
         )
 }
+
+/** States worth one screenshot each, in the light theme only. */
+@RunWith(org.robolectric.RobolectricTestRunner::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(qualifiers = "w411dp-h891dp-xxhdpi")
+class StateScreenshotTest {
+    @get:Rule
+    val compose = createComposeRule()
+
+    private val appearance =
+        AppearanceSettings(themeMode = ThemeMode.LIGHT, dynamicColor = false, motion = MotionPref.OFF)
+
+    @Test
+    fun processesPaused() =
+        capture(
+            "processes-paused.png",
+            SampleData.processes.copy(paused = true, filter = SampleData.processes.filter.copy(showSystem = true)),
+        )
+
+    @Test
+    fun processesSearching() =
+        capture(
+            "processes-searching.png",
+            SampleData.processes.copy(
+                groups = SampleData.processes.groups.take(1),
+                filter = SampleData.processes.filter.copy(query = "chat"),
+            ),
+        )
+
+    private fun capture(
+        name: String,
+        state: ProcessesUiState,
+    ) {
+        compose.setContent {
+            PicketTheme(appearance) { Surface { ProcessesScreen(state, {}, {}, {}, {}, {}, {}) } }
+        }
+        compose.onRoot().captureRoboImage(name)
+    }
+}

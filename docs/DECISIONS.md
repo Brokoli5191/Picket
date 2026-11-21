@@ -397,3 +397,18 @@ exemptions need `sys-whitelist` (not offered in v1).
   label at three widths at 200 % font and fails on the old layout.
 - Rejected: an ellipsis (hides what the option is), shrinking the text (illegible exactly for the
   people who chose the large font), a dropdown at large font sizes (an extra tap for them).
+
+## D25 — The process list starts with search, not with controls (2026-11-21)
+
+- **Problem:** the search field and four sort buttons sat above the list; at 200 % font they took a
+  third of the screen before the first process. The "show system" toggle used the shield icon that
+  also stands for protected apps, and a paused list looked exactly like a live one.
+- **Choice:** the top bar is an Expressive search bar (`AppBarWithSearch`) that filters in place
+  and slides away while scrolling down. Below it, one line with the totals, a "Paused" badge while
+  sampling is paused, and a "Sort: CPU" button that opens a single-choice menu. The floating toolbar
+  keeps pause and gets a labelled "System" toggle instead of the shield. Scrolling the list puts the
+  keyboard away. The title "Processes" is dropped on this screen; the navigation bar already says it.
+- Rejected: an expanding full-screen search with a separate results page (the list already is the
+  result, with its expand and open actions), keeping the large title (costs a row for information
+  the navigation bar shows), and sort in the floating toolbar (at 200 % font the toolbar would no
+  longer fit on a 360 dp screen).

@@ -31,8 +31,12 @@
         <item quantity="one">%1$d process</item>
         <item quantity="other">%1$d processes</item>
     </plurals>
-    <string name="processes_search">Search apps, packages, processes or PIDs</string>
-    <string name="processes_show_system">Show system</string>
+    <string name="processes_search">Search name, package or PID</string>
+    <string name="processes_search_clear">Clear search</string>
+    <string name="processes_sort">Sort: %1$s</string>
+    <string name="processes_paused">Paused</string>
+    <string name="processes_system">System</string>
+    <string name="processes_show_system">Show system processes</string>
     <string name="processes_pause">Pause</string>
     <string name="processes_resume">Resume</string>
     <string name="process_meta">PID %1$d · %2$s · up %3$s</string>

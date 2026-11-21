@@ -126,3 +126,16 @@ fun <T> ChoiceRow(
         }
     }
 }
+
+/** A toggle with a visible label, for toolbars where an icon alone would be ambiguous. */
+@Composable
+fun LabelToggle(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+) {
+    ToggleButton(checked = checked, onCheckedChange = onCheckedChange, modifier = modifier) {
+        Text(label, maxLines = 1)
+    }
+}

@@ -6,15 +6,17 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ButtonGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
@@ -22,24 +24,29 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumFlexibleTopAppBar
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.brokoli5191.picket.R
@@ -50,14 +57,18 @@ import app.brokoli5191.picket.core.process.Importance
 import app.brokoli5191.picket.core.process.ProcessRow
 import app.brokoli5191.picket.core.process.SortOrder
 import app.brokoli5191.picket.ui.components.AppIcon
+import app.brokoli5191.picket.ui.components.ChoiceMenu
 import app.brokoli5191.picket.ui.components.ExpandIcon
 import app.brokoli5191.picket.ui.components.ExpandableContent
 import app.brokoli5191.picket.ui.components.NoticeCard
+import app.brokoli5191.picket.ui.components.PopContent
 import app.brokoli5191.picket.ui.components.RollingNumber
 import app.brokoli5191.picket.ui.components.itemMotion
 import app.brokoli5191.picket.ui.components.segmentedColors
-import app.brokoli5191.picket.ui.expressive.ChoiceRow
 import app.brokoli5191.picket.ui.expressive.DelayedLoadingIndicator
+import app.brokoli5191.picket.ui.expressive.LabelToggle
+import app.brokoli5191.picket.ui.expressive.SearchTopBar
+import app.brokoli5191.picket.ui.expressive.rememberSearchTopBarScroll
 import app.brokoli5191.picket.ui.theme.rememberHaptics
 
 @Composable
@@ -75,29 +86,23 @@ fun ProcessesScreen(
     val listState = rememberLazyListState()
     val expanded = remember { mutableStateMapOf<GroupKey, Boolean>() }
     val haptics = rememberHaptics()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    LaunchedEffect(listState.isScrollInProgress) { onInteracting(listState.isScrollInProgress) }
+    val searchScroll = rememberSearchTopBarScroll()
+    val focus = LocalFocusManager.current
+    LaunchedEffect(listState.isScrollInProgress) {
+        onInteracting(listState.isScrollInProgress)
+        // Scrolling through the matches puts the keyboard away.
+        if (listState.isScrollInProgress) focus.clearFocus()
+    }
 
     Scaffold(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier.nestedScroll(searchScroll.nestedScrollConnection),
         topBar = {
-            MediumFlexibleTopAppBar(
-                title = { Text(stringResource(R.string.nav_processes)) },
-                subtitle = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        RollingNumber(
-                            stringResource(R.string.processes_cpu_total, Formatters.percent(state.totalCpuPercent)),
-                            state.totalCpuPercent,
-                            MaterialTheme.typography.labelLarge,
-                        )
-                        Text(
-                            stringResource(R.string.separator) +
-                                pluralStringResource(R.plurals.processes_total, state.processCount, state.processCount),
-                            style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"),
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior,
+            SearchTopBar(
+                query = state.filter.query,
+                onQueryChange = onQuery,
+                placeholder = stringResource(R.string.processes_search),
+                clearLabel = stringResource(R.string.processes_search_clear),
+                scroll = searchScroll,
             )
         },
     ) { padding ->
@@ -119,8 +124,8 @@ fun ProcessesScreen(
                         }
                     },
             ) {
-                item(key = "controls") {
-                    Controls(state, onQuery, onSort, showDebug, haptics::tick)
+                item(key = "header") {
+                    Header(state, onSort, showDebug, haptics::tick)
                 }
                 itemsIndexed(state.groups, key = { _, group -> group.key.toString() }) { index, group ->
                     GroupItem(
@@ -158,50 +163,55 @@ fun ProcessesScreen(
                             ),
                     )
                 }
-                IconToggleButton(
+                val showSystem = stringResource(R.string.processes_show_system)
+                LabelToggle(
                     checked = state.filter.showSystem,
                     onCheckedChange = {
                         haptics.toggle(it)
                         onShowSystem(it)
                     },
-                ) {
-                    Icon(
-                        painterResource(R.drawable.ic_shield),
-                        contentDescription = stringResource(R.string.processes_show_system),
-                    )
-                }
+                    label = stringResource(R.string.processes_system),
+                    modifier = Modifier.semantics { contentDescription = showSystem },
+                )
             }
         }
     }
 }
 
+/** Totals, the paused state and the sort order, above the list and scrolling with it. */
 @Composable
-private fun Controls(
+private fun Header(
     state: ProcessesUiState,
-    onQuery: (String) -> Unit,
     onSort: (SortOrder) -> Unit,
     showDebug: Boolean,
     tick: () -> Unit,
 ) {
-    Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        OutlinedTextField(
-            value = state.filter.query,
-            onValueChange = onQuery,
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            leadingIcon = { Icon(painterResource(R.drawable.ic_search), contentDescription = null) },
-            placeholder = { Text(stringResource(R.string.processes_search)) },
-        )
-        ChoiceRow(
-            options = SortOrder.entries,
-            selected = state.sort,
-            label = { sortLabel(it) },
-            onSelect = { order ->
-                tick()
-                onSort(order)
-            },
-            modifier = Modifier.fillMaxWidth(),
-        )
+    Column(
+        Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // Separate items, so that at large font sizes the count moves to the next line as a whole
+            // instead of being squeezed into a column beside the CPU figure.
+            FlowRow(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
+                RollingNumber(
+                    stringResource(R.string.processes_cpu_total, Formatters.percent(state.totalCpuPercent)),
+                    state.totalCpuPercent,
+                    MaterialTheme.typography.labelLarge,
+                )
+                Text(
+                    stringResource(R.string.separator) +
+                        pluralStringResource(R.plurals.processes_total, state.processCount, state.processCount),
+                    style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"),
+                )
+                PopContent(visible = state.paused) { PausedBadge(Modifier.padding(start = 8.dp)) }
+            }
+            SortButton(state.sort, onSort, tick)
+        }
         state.error?.let { NoticeCard(stringResource(R.string.error_title), it.message, error = true) }
         if (showDebug) {
             state.timing?.let { t ->
@@ -217,6 +227,52 @@ private fun Controls(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun PausedBadge(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+    ) {
+        Row(
+            Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(painterResource(R.drawable.ic_pause), contentDescription = null, modifier = Modifier.size(16.dp))
+            Text(stringResource(R.string.processes_paused), style = MaterialTheme.typography.labelMedium)
+        }
+    }
+}
+
+@Composable
+private fun SortButton(
+    sort: SortOrder,
+    onSort: (SortOrder) -> Unit,
+    tick: () -> Unit,
+) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        TextButton(onClick = { open = true }) {
+            Text(stringResource(R.string.processes_sort, sortLabel(sort)))
+            ExpandIcon(open, decorative = true)
+        }
+        ChoiceMenu(
+            expanded = open,
+            onDismiss = { open = false },
+            options = SortOrder.entries,
+            selected = sort,
+            label = { sortLabel(it) },
+            onSelect = { order ->
+                tick()
+                onSort(order)
+                open = false
+            },
+        )
     }
 }
 
