@@ -76,7 +76,8 @@ class ScrollBenchmark {
         }
 
     private companion object {
-        const val SHIZUKU_MISSING = "Shizuku is not installed"
+        /** The connection screen's action when Shizuku is missing; no other state shows it. */
+        const val SHIZUKU_MISSING = "Get Shizuku"
     }
 }
 
