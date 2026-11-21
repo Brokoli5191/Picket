@@ -32,6 +32,24 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6
 
+      # Robolectric downloads its Android runtime (one large jar per SDK) from Maven Central while the
+      # tests run, outside Gradle and its cache. With this cache only the first run after a Robolectric
+      # update downloads it, so a network hiccup on the runner rarely reaches the tests.
+      - name: Read the Robolectric version
+        id: robolectric
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^robolectric = "\(.*\)"$/\1/p' gradle/libs.versions.toml)"
+          [[ -n "$version" ]] || { echo "::error::robolectric version not found in gradle/libs.versions.toml"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the Robolectric runtime
+        uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-${{ steps.robolectric.outputs.version }}
+          restore-keys: robolectric-
+
       - name: Spotless, Lint, unit and screenshot tests, debug build
         run: >-
           ./gradlew
