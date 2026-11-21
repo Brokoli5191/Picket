@@ -24,6 +24,8 @@ import app.brokoli5191.picket.privileged.IPicketService
 import app.brokoli5191.picket.privileged.service.PicketUserService
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,6 +66,13 @@ class PrivilegedClient(
     @Volatile
     private var bindRequested = false
 
+    /** Main-thread bookkeeping for the connect watchdog. */
+    private var watchdog: Job? = null
+    private var automaticRetries = 0
+
+    /** Counts bind attempts, so a late handshake of an abandoned attempt is ignored. */
+    private var attempt = 0
+
     private val args =
         Shizuku
             .UserServiceArgs(ComponentName(appContext.packageName, PicketUserService::class.java.name))
@@ -75,6 +84,7 @@ class PrivilegedClient(
     private val binderReceived = Shizuku.OnBinderReceivedListener { evaluate() }
     private val binderDead =
         Shizuku.OnBinderDeadListener {
+            watchdog?.cancel()
             service = null
             bindRequested = false
             evaluate()
@@ -90,12 +100,18 @@ class PrivilegedClient(
                 name: ComponentName,
                 binder: IBinder?,
             ) {
+                if (!bindRequested) return
                 if (binder == null || !binder.pingBinder()) {
-                    mutableState.value = PrivilegedState.Failed("The privileged service returned a dead binder")
+                    // A stale binder of a helper that is going away; the watchdog retries.
+                    Log.w(TAG, "Ignoring a dead binder from onServiceConnected")
                     return
                 }
                 val candidate = IPicketService.Stub.asInterface(binder)
-                scope.launch(ioDispatcher) { handshake(candidate) }
+                val token = attempt
+                scope.launch(ioDispatcher) {
+                    val result = handshake(candidate)
+                    withContext(mainDispatcher) { finishConnect(token, candidate, result) }
+                }
             }
 
             override fun onServiceDisconnected(name: ComponentName) {
@@ -137,10 +153,26 @@ class PrivilegedClient(
 
     /** Stops the privileged process (it is restarted on the next bind). */
     fun shutdown() {
+        dropBinding()
+        evaluate()
+    }
+
+    /**
+     * Throws away whatever binding exists, stuck or not, and starts over. Behind the "Try again"
+     * button, so a hang never needs an app restart.
+     */
+    fun reconnect() {
+        automaticRetries = 0
+        dropBinding()
+        evaluate()
+    }
+
+    /** Unbinds and stops the helper; remove = true also ends a half-started service process. */
+    private fun dropBinding() {
+        watchdog?.cancel()
         if (Shizuku.pingBinder()) runCatching { Shizuku.unbindUserService(args, connection, true) }
         service = null
         bindRequested = false
-        evaluate()
     }
 
     fun isShizukuInstalled(): Boolean =
@@ -230,39 +262,88 @@ class PrivilegedClient(
         if (current != null && current.asBinder().pingBinder()) return
         if (bindRequested) return
         bindRequested = true
+        attempt++
         mutableState.value = PrivilegedState.Connecting
         try {
             Shizuku.bindUserService(args, connection)
         } catch (e: RuntimeException) {
-            bindRequested = false
-            mutableState.value = PrivilegedState.Failed("Could not start the privileged service: ${e.message}")
+            fail("Could not start the privileged service: ${e.message}")
+            return
         }
+        armWatchdog()
     }
 
-    private fun handshake(candidate: IPicketService) {
+    /**
+     * Shizuku reports nothing when the helper process dies while starting or a bind request is
+     * lost, so without a deadline the app would show "Connecting" until it is restarted. After
+     * [CONNECT_TIMEOUT_MS] the binding is dropped and retried once, then reported as failed.
+     */
+    private fun armWatchdog() {
+        watchdog?.cancel()
+        watchdog =
+            scope.launch(mainDispatcher) {
+                delay(CONNECT_TIMEOUT_MS)
+                if (mutableState.value !is PrivilegedState.Connecting) return@launch
+                Log.w(TAG, "No connection after $CONNECT_TIMEOUT_MS ms (automatic retries: $automaticRetries)")
+                dropBinding()
+                if (automaticRetries < MAX_AUTOMATIC_RETRIES) {
+                    automaticRetries++
+                    evaluate()
+                } else {
+                    fail("The privileged helper did not start within ${CONNECT_TIMEOUT_MS / 1_000} seconds.")
+                }
+            }
+    }
+
+    private fun fail(message: String) {
+        watchdog?.cancel()
+        bindRequested = false
+        service = null
+        mutableState.value = PrivilegedState.Failed(message)
+    }
+
+    /** Runs on the IO dispatcher: binder calls may block. */
+    private fun handshake(candidate: IPicketService): Result<ServiceIdentity> =
         try {
             val protocol = candidate.protocolVersion()
             if (protocol != PayloadCodec.PROTOCOL_VERSION) {
-                mutableState.value =
-                    PrivilegedState.Failed(
+                Result.failure(
+                    IllegalStateException(
                         "Privileged service speaks protocol $protocol, app expects ${PayloadCodec.PROTOCOL_VERSION}",
-                    )
-                return
-            }
-            val identity =
-                ServiceIdentity(
-                    uid = candidate.uid(),
-                    seLinuxContext = candidate.seLinuxContext(),
-                    serverVersion = Shizuku.getVersion(),
-                    isSui = Sui.isSui(),
+                    ),
                 )
-            service = candidate
-            mutableState.value = PrivilegedState.Connected(identity)
+            } else {
+                Result.success(
+                    ServiceIdentity(
+                        uid = candidate.uid(),
+                        seLinuxContext = candidate.seLinuxContext(),
+                        serverVersion = Shizuku.getVersion(),
+                        isSui = Sui.isSui(),
+                    ),
+                )
+            }
         } catch (e: RemoteException) {
-            mutableState.value = PrivilegedState.Failed("Privileged service did not answer: ${e.message}")
+            Result.failure(IllegalStateException("Privileged service did not answer: ${e.message}", e))
         } catch (e: SecurityException) {
-            mutableState.value = PrivilegedState.Failed("Privileged service refused the app: ${e.message}")
+            Result.failure(IllegalStateException("Privileged service refused the app: ${e.message}", e))
+        } catch (e: RuntimeException) {
+            Result.failure(IllegalStateException("Handshake failed: ${e.message}", e))
         }
+
+    /** Main thread: commits the handshake unless the attempt was abandoned meanwhile. */
+    private fun finishConnect(
+        token: Int,
+        candidate: IPicketService,
+        result: Result<ServiceIdentity>,
+    ) {
+        if (token != attempt || !bindRequested) return
+        result
+            .onSuccess { identity ->
+                watchdog?.cancel()
+                automaticRetries = 0
+                service = candidate
+                mutableState.value = PrivilegedState.Connected(identity)
+            }.onFailure { fail(it.message.orEmpty()) }
     }
 
     companion object {
@@ -270,6 +351,10 @@ class PrivilegedClient(
         const val PROCESS_SUFFIX = "privileged"
         private const val PERMISSION_REQUEST_CODE = 0x5049
         private const val TAG = "PrivilegedClient"
+
+        /** A cold start of the helper takes about one second; this leaves room for slow phones. */
+        const val CONNECT_TIMEOUT_MS = 10_000L
+        private const val MAX_AUTOMATIC_RETRIES = 1
     }
 }
 

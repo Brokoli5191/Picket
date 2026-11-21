@@ -164,7 +164,10 @@ class ScreenshotTest(
         }
 
     @Test
-    fun connection() = capture("connection") { ConnectionScreen(PrivilegedState.NotRunning, {}, {}, {}) }
+    fun connection() =
+        capture("connection") {
+            ConnectionScreen(PrivilegedState.NotRunning, app.brokoli5191.picket.R.string.nav_processes, {}, {}, {})
+        }
 
     companion object {
         @JvmStatic
