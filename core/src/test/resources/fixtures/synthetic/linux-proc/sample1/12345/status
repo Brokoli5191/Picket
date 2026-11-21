@@ -1,0 +1,15 @@
+Name:	id.gms.unstabl
+Umask:	0077
+State:	S (sleeping)
+Tgid:	12345
+Ngid:	0
+Pid:	12345
+PPid:	1043
+TracerPid:	0
+Uid:	10123	10123	10123	10123
+Gid:	10123	10123	10123	10123
+FDSize:	256
+Groups:	3002 3003 9997 20123 50123 
+VmPeak:	16112345 kB
+VmRSS:	  187644 kB
+Threads:	87

@@ -1,5 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Picket</string>
-    <string name="app_tagline">What runs, what wakes your phone, who reads along.</string>
+
+    <!-- Connection to Shizuku / Sui -->
+    <string name="connection_title_connecting">Connecting…</string>
+    <string name="connection_body_connecting">Starting Picket\'s privileged helper through Shizuku.</string>
+    <string name="connection_title_not_installed">Shizuku is not installed</string>
+    <string name="connection_body_not_installed">Picket needs Shizuku (or Sui on rooted devices) to see other apps\' processes and settings. Install Shizuku, start it, then come back.</string>
+    <string name="connection_title_not_running">Shizuku is not running</string>
+    <string name="connection_body_not_running">Shizuku stops when the phone restarts. Open Shizuku and start it again; with wireless debugging you may have to pair it again after a reboot.</string>
+    <string name="connection_title_unsupported">Shizuku is too old</string>
+    <string name="connection_body_unsupported">This Shizuku version does not support the helper service Picket uses. Update Shizuku and try again.</string>
+    <string name="connection_title_permission">Allow Picket to use Shizuku</string>
+    <string name="connection_body_permission">Picket runs a small helper with shell privileges through Shizuku. It can only do the specific things listed in the app, never run arbitrary commands, and Picket has no internet access.</string>
+    <string name="connection_title_denied">Access to Shizuku was denied</string>
+    <string name="connection_body_denied">You chose not to be asked again. Open Shizuku, find Picket in the list of authorised apps and allow it.</string>
+    <string name="connection_title_connected">Connected</string>
+    <string name="connection_body_connected">The privileged helper is running.</string>
+    <string name="connection_title_failed">Something went wrong</string>
+    <string name="connection_body_failed">The privileged helper could not be started.</string>
+    <string name="connection_action_grant">Allow</string>
+    <string name="connection_action_open_shizuku">Open Shizuku</string>
+    <string name="connection_action_retry">Try again</string>
+    <string name="connection_why">Why Shizuku? Android hides other apps\' processes, services and privileged settings from normal apps. Shizuku lends Picket the same rights you have in an adb shell, without rooting the phone.</string>
+
+    <!-- Processes -->
+    <string name="processes_cpu_total">CPU %1$s</string>
+    <plurals name="processes_total">
+        <item quantity="one">%1$d process</item>
+        <item quantity="other">%1$d processes</item>
+    </plurals>
+    <string name="processes_search">Search apps, packages, processes or PIDs</string>
+    <string name="processes_show_system">Show system</string>
+    <string name="processes_pause">Pause</string>
+    <string name="processes_resume">Resume</string>
+    <string name="process_meta">PID %1$d · %2$s · up %3$s</string>
+    <string name="group_kernel">Kernel threads</string>
+    <string name="group_isolated">Isolated processes</string>
+    <string name="group_system_uid">System: %1$s</string>
+    <string name="sort_cpu">CPU</string>
+    <string name="sort_memory">Memory</string>
+    <string name="sort_name">Name</string>
+    <string name="sort_uptime">Uptime</string>
+    <string name="debug_sampling_cost">Sample: %1$.1f ms round trip, %2$.1f ms service CPU, %3$.1f KB, files read: %4$d</string>
 </resources>
