@@ -329,7 +329,11 @@ row "Remove default role holder" "cmd role remove-role-holder --user $USER_ID $R
 section "DND access"
 dnd_state() {
   x dumpsys notification --zen
-  printf '%s' "$OUT" | grep -E "^\s+.* \(user: $USER_ID isPrimary: true" | grep -q "$PKG" && echo granted || echo absent
+  # Filter first, then test the captured lines: with pipefail, `… | grep -q` can report a match as
+  # failure when grep -q exits early and the writer gets SIGPIPE.
+  local primary
+  primary="$(printf '%s' "$OUT" | grep -E "^\s+.* \(user: $USER_ID isPrimary: true")"
+  grep -qF "$PKG" <<< "$primary" && echo granted || echo absent
 }
 x cmd notification allow_dnd "$PKG" "$USER_ID"
 before="$(dnd_state)"

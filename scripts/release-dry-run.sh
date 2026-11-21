@@ -92,7 +92,9 @@ done
 
 log "== baseline profile"
 # The APK carries the profiles of its libraries (Compose and others) even without one of Picket's.
-if unzip -Z1 "$apk" | grep -q '^assets/dexopt/baseline.prof$'; then
+# Listing captured first: `unzip | grep -q` fails under pipefail when grep exits before unzip.
+entries="$(unzip -Z1 "$apk")"
+if grep -qx 'assets/dexopt/baseline.prof' <<< "$entries"; then
   log "assets/dexopt/baseline.prof present"
 else
   log "no assets/dexopt/baseline.prof"
