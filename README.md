@@ -193,6 +193,17 @@ gh attestation verify picket-v<version>.apk --repo Brokoli5191/Picket
 The attestation shows that the APK was built by this repository's release workflow, and from which
 commit.
 
+Every release is signed with the same key. Its certificate fingerprint:
+
+```text
+SHA-256: 0C:DB:13:CF:EA:8D:E1:5C:54:5E:2C:8F:DC:3C:CC:4E:B5:39:D3:9E:00:4A:AD:6B:99:EB:9A:50:19:5D:C2:17
+```
+
+Compare it with `apksigner verify --print-certs picket-v<version>.apk` (Android SDK build-tools), or
+let [AppVerifier](https://github.com/soupslurpr/AppVerifier) check the installed app. Android refuses
+to update Picket with an APK signed by any other key, so after the first install a mismatch cannot slip
+through unnoticed; checking before that first install is what this is for.
+
 ## Privacy
 
 Picket has no network access at all. Everything it reads stays in memory on the phone, and the

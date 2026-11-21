@@ -3,13 +3,19 @@
 # records the state before, after and after undo. The result decides what docs/COMMANDS.md may
 # call "verified".
 #
-# Usage:
-#   ./gradlew :testtarget:assembleDebug
-#   scripts/device-checks.sh [--keep-target]
+# Usage: scripts/device-checks.sh [--keep-target] [--apk PATH]
 #
-# Needs adb only (no Shizuku). The commands run with the same shell uid that Shizuku lends Picket.
-# Everything touched is either the test target or restored afterwards (the default browser role is
-# put back to its previous holder). --keep-target leaves the test target installed.
+# Needs bash, adb and a phone with USB or wireless debugging; no Shizuku, no Android SDK. The commands
+# run with the same shell uid that Shizuku lends Picket. Everything touched is either the test target
+# or restored afterwards (the default browser role goes back to its previous holder).
+#
+# The test target APK is taken from, in this order:
+#   --apk PATH                                   a file you downloaded or built
+#   testtarget/build/outputs/apk/debug/          a local ./gradlew :testtarget:assembleDebug
+#   device-results/testtarget.apk                a copy fetched earlier (delete it to fetch again)
+#   the newest successful CI run on main         artifact "testtarget-apk", via the GitHub CLI
+#                                                (run `gh auth login` once)
+# --keep-target leaves the test target installed.
 #
 # Output: device-results/<device>-<api>-<time>/summary.md (paste into a GitHub issue) and log.txt
 # (every command with stdout, stderr and exit status).
@@ -18,7 +24,23 @@
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 keep_target=false
-[[ "${1:-}" == "--keep-target" ]] && keep_target=true
+APK=""
+while (($#)); do
+  case "$1" in
+    --keep-target) keep_target=true ;;
+    --apk)
+      APK="${2:-}"
+      [[ -n "$APK" ]] || die "--apk needs a path"
+      shift
+      ;;
+    -h | --help)
+      sed -n '2,21s/^# \{0,1\}//p' "$0"
+      exit 0
+      ;;
+    *) die "unknown option: $1 (see --help)" ;;
+  esac
+  shift
+done
 
 PKG=app.brokoli5191.picket.testtarget
 NLS="$PKG/.DummyNotificationListener"
@@ -30,10 +52,49 @@ MAIN="$PKG/.MainActivity"
 PERM=android.permission.READ_CALENDAR
 ROLE=android.app.role.BROWSER
 USER_ID=0
-APK="$ROOT/testtarget/build/outputs/apk/debug/testtarget-debug.apk"
+REPO_SLUG=Brokoli5191/Picket
+LOCAL_BUILD="$ROOT/testtarget/build/outputs/apk/debug/testtarget-debug.apk"
+FETCHED="$ROOT/device-results/testtarget.apk"
+
+# Finds the test target APK without requiring an Android build environment (see the header).
+resolve_apk() {
+  if [[ -n "$APK" ]]; then
+    [[ -f "$APK" ]] || die "--apk: no such file: $APK"
+    return
+  fi
+  if [[ -f "$LOCAL_BUILD" ]]; then
+    APK="$LOCAL_BUILD"
+    return
+  fi
+  if [[ -f "$FETCHED" ]]; then
+    APK="$FETCHED"
+    return
+  fi
+  if command -v gh > /dev/null 2>&1 && gh auth status > /dev/null 2>&1; then
+    info "Fetching the test target from the newest successful CI run on main"
+    local run tmp found
+    run="$(gh run list --repo "$REPO_SLUG" --workflow ci.yml --branch main --limit 20 \
+      --json databaseId,conclusion --jq '[.[] | select(.conclusion == "success")][0].databaseId' 2> /dev/null)"
+    [[ -n "$run" && "$run" != "null" ]] || die "no successful CI run on main found"
+    tmp="$(mktemp -d)"
+    gh run download "$run" --repo "$REPO_SLUG" --name testtarget-apk --dir "$tmp" > /dev/null 2>&1 ||
+      die "could not download the testtarget-apk artifact of CI run $run (artifacts expire after 30 days)"
+    found="$(find "$tmp" -name '*.apk' -print -quit)"
+    [[ -n "$found" ]] || die "the artifact of CI run $run holds no APK"
+    mkdir -p "$(dirname "$FETCHED")"
+    mv "$found" "$FETCHED"
+    rm -rf "$tmp"
+    APK="$FETCHED"
+    return
+  fi
+  die "no test target APK. Install the GitHub CLI and run 'gh auth login' (this script then fetches it), \
+or download the artifact 'testtarget-apk' from https://github.com/$REPO_SLUG/actions/workflows/ci.yml \
+and pass --apk PATH, or build it with ./gradlew :testtarget:assembleDebug"
+}
 
 require_device
-[[ -f "$APK" ]] || die "test target not built: run ./gradlew :testtarget:assembleDebug first"
+resolve_apk
+info "Test target: ${APK#"$ROOT"/}"
 
 slug="$(device_slug)"
 api="$(device_api)"

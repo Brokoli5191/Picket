@@ -53,6 +53,30 @@ scripts/device-checks.sh               # runs every action against :testtarget, 
 Commit the fixtures in a PR and paste the `device-checks.sh` summary into an issue using the
 "Device results" link on the issue chooser. Results end up in `docs/COMMANDS.md`.
 
+### On Linux, with nothing but adb
+
+Neither script needs Java, Gradle or the Android SDK.
+
+1. Install adb: `sudo apt install adb` (Debian, Ubuntu), `sudo dnf install android-tools` (Fedora) or
+   `sudo pacman -S android-tools` (Arch).
+2. On the phone, enable Developer options (Samsung: Settings → About phone → Software information →
+   tap *Build number* seven times), then *USB debugging*. Connect the cable, run `adb devices` and
+   confirm the prompt on the phone; the phone must be listed as `device`. Wireless debugging works
+   too (`adb pair` and `adb connect`). With several devices attached, choose one with
+   `ANDROID_SERIAL=<serial>` in front of the script.
+3. In a clone of the repository:
+
+   ```sh
+   scripts/capture-fixtures.sh      # read-only, about two minutes
+   scripts/device-checks.sh         # installs the test target, runs each action and its undo
+   ```
+
+`device-checks.sh` needs the small `:testtarget` APK. With the GitHub CLI logged in (`gh auth login`)
+it downloads the APK from the newest CI run by itself; otherwise download the `testtarget-apk`
+artifact from a [CI run](https://github.com/Brokoli5191/Picket/actions/workflows/ci.yml) and pass
+`--apk path/to/testtarget-debug.apk`. The script changes only the test target and puts everything
+else it touches back (accessibility list, default browser), even when it is interrupted.
+
 ## Commits and pull requests
 
 - [Conventional Commits](https://www.conventionalcommits.org/) in English (`feat:`, `fix:`, `chore:`,
