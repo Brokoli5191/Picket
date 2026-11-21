@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kover)
+    alias(libs.plugins.android.lint)
 }
 
 java {
@@ -33,6 +34,12 @@ kover {
             }
         }
     }
+}
+
+lint {
+    warningsAsErrors = true
+    abortOnError = true
+    disable += setOf("GradleDependency", "AndroidGradlePluginVersion", "NewerVersionAvailable")
 }
 
 tasks.named("check") {

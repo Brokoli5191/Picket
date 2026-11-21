@@ -1,0 +1,10 @@
+system-excidle,com.android.providers.calendar,10060
+system-excidle,com.android.providers.downloads,10039
+system-excidle,com.google.android.gms,10146
+system-excidle,com.android.shell,2000
+system-excidle,com.android.providers.contacts,10061
+system,com.android.providers.calendar,10060
+system,com.android.providers.downloads,10039
+system,com.google.android.gms,10146
+system,com.android.shell,2000
+user,com.example.chat,10123

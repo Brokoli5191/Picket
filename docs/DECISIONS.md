@@ -186,3 +186,68 @@ The process list polls (`listProcesses()` every 2 s, pausable) and diffs consecu
 app. A callback interface from the service would need a second AIDL interface, death handling in
 both directions and back-pressure, for no gain at a 2 s cadence. The sampler flow only runs while
 the screen collects it, and stops when Shizuku disconnects.
+
+## D15 — Fixtures and the capture script share one naming rule (2026-11-20)
+
+Fixture file name = the command's argv without `/system/bin/`, joined with `_` (`/` → `%`).
+`scripts/capture-fixtures.sh` derives names the same way and records exactly the argv that
+`ReadCommands` in `:core` runs (with `com.android.systemui` as the sample package and user 0).
+`CaptureScriptTest` fails when a read command is added without being captured. A directory recorded
+on a device therefore drives the collectors unchanged in tests (`FixtureExecutor`).
+Until real recordings exist, `fixtures/synthetic/aosp-main/` holds hand-written output derived from
+the AOSP `main` printing code (provenance in its `SOURCE.md`).
+
+Privacy: the capture script redacts e-mail, MAC/IP addresses, Wi-Fi names, intent data URIs and
+phone numbers, and maps user-installed package names to `com.example.userN` (opt-out flag), because
+fixtures from a personal phone land in a public repository.
+
+## D16 — Watcher sources (2026-11-20)
+
+| Hook | Source | Notes |
+|---|---|---|
+| Notification listeners | `settings get secure enabled_notification_listeners` + "Live notification listeners" of `dumpsys notification` | Approvals are still mirrored to Settings (`NotificationListeners#shouldReflectToSettings` returns true because androidx reads it). Live = bound now. |
+| Accessibility | `enabled_accessibility_services` + `accessibility_enabled` | Inactive when the master switch is off. |
+| Device admins | `dumpsys device_policy` | "Enabled Device Admins (User N…)" blocks; device/profile owner from the owner blocks. |
+| Keyboards | `enabled_input_methods`, `default_input_method` | Subtype hashes after `;` are dropped. |
+| Usage access, overlay | `cmd appops query-op <OP> allow` | One package per line or `No operations.` (AppOpsService.Shell). Apps whose access comes from a pre-granted permission with mode `default` are not listed; noted as a known gap. |
+| VPN | `dumpsys vpn_management` (Android 12+) + `always_on_vpn_app` | `Active vpn type: -1` = not connected; `[Legacy VPN]` = no app. Below Android 12 only the always-on setting is shown. |
+| Default roles | `cmd role get-role-holders --user N ROLE` (API 34+), else `dumpsys role` | Holders joined with `;`. Older releases print `Unknown command` on stdout with exit 0, which must not be read as "no holders"; the collector probes once and falls back to the role dump. |
+| DND access | "Allowed condition providers" of `dumpsys notification --zen`, `isPrimary: true` | `enabled_notification_policy_access_packages` is only maintained up to Android 11; `isPrimary: false` is the implicit grant every approved listener gets. |
+
+Each source fails independently; the UI lists failed sources instead of hiding the rest.
+
+## D17 — Wakeup sources, and a side effect avoided (2026-11-20)
+
+- **Totals ("top offenders")**: `dumpsys batterystats -c android` — the aggregates since the last
+  charge for *all* uids (`wl` partial wakelock time/count, `jb` jobs, `wua` wakeup alarms), without
+  history. **Not `--checkin`**: that variant may print the *previous* cycle and deletes the
+  system's saved checkin file (BatteryStatsService, main ~3495–3520), which would be a side effect
+  on the user's device. Fallback when batterystats fails: "Alarm Stats" of `dumpsys alarm` (since boot).
+- **Timeline**: events Android still keeps with a time — "App Alarm history" of `dumpsys alarm`
+  (wakeup deliveries, about the last hour), the last delivery of each alarm tag ("Alarm Stats"), and
+  "Job history" of `dumpsys jobscheduler` (last 100 start/stop events). Relative times are anchored
+  to the service's clock when the dump is taken. The UI says that totals are since the last charge.
+- **Not in v1**: decoding the battery history (`dumpsys batterystats -c --history-start N`), which
+  would give every kernel wake with uid and alarm tag for 6/24 h windows. It needs incremental
+  polling and re-anchoring on `TIME:` records; planned for a later version.
+- `am get-standby-buckets` does not exist; `am get-standby-bucket` without a package lists `pkg: N`.
+
+## D18 — Output differences between releases that the parsers handle (2026-11-20)
+
+From the AOSP research (android10 … android17 branches); each case has a fixture or test:
+
+- `dumpsys activity services`: no FGS type before API 34, `types=%08X` on API 34, `types=0x%08X`
+  from API 35; from API 35 the record header carries ` c:<callingPackage>`; from API 34 a
+  ` startCommandResult=` line is printed with a single leading space inside the block.
+- `dumpsys package`: `userId=` up to API 33, `appId=` from API 34.
+- `dumpsys meminfo --checkin PID`: checkin version 4 everywhere; total PSS is field 19 (kB).
+  (`-c` is a different, compact format.)
+- `cmd role get-role-holders`: API 34+ only (see D16).
+- `dumpsys vpn_management`: connection state (`Active vpn type`) only from API 14; on 12/13 the
+  listed package is merely the consented app and is not reported as an active VPN.
+
+Behaviour that matters for actions (milestone 5): `am stop-service` exits 255 even on success (the
+message decides), `am force-stop`/`am kill` exit 0 even for unknown packages, `cmd notification`
+reports errors on stdout with exit 0, `accessibility_enabled` is recomputed by the system and is
+never written, `pm default-state` is the exact inverse of `pm disable-user`, and system doze
+exemptions need `sys-whitelist` (not offered in v1).

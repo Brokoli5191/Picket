@@ -1,0 +1,1 @@
+com.example.notes/com.example.notes.NoteListener:com.google.android.gms/.nearby.exposurenotification.WakeUpService

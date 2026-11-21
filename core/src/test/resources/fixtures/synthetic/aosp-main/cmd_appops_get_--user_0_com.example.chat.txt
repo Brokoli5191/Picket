@@ -1,0 +1,5 @@
+Uid mode: RUN_ANY_IN_BACKGROUND: ignore
+WAKE_LOCK: allow; time=+3m1s2ms ago; duration=+1s200ms
+POST_NOTIFICATION: allow; time=+12m4s ago
+SYSTEM_ALERT_WINDOW: ignore; rejectTime=+2d1h ago
+CAMERA: allow (running)

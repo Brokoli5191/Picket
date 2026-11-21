@@ -1,0 +1,11 @@
+VPNs:
+  0: com.example.vpn
+    Active package name: com.example.vpn
+    Active vpn type: 1
+    NetworkCapabilities: [ Transports: VPN Capabilities: NOT_METERED&INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED UnderlyingNetworks: Null]
+
+  10: [Legacy VPN]
+    Active package name: [Legacy VPN]
+    Active vpn type: -1
+    NetworkCapabilities: null
+

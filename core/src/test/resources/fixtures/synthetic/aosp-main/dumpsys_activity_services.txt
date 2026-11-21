@@ -1,0 +1,138 @@
+ACTIVITY MANAGER SERVICES (dumpsys activity services)
+  User 0 active services:
+  * ServiceRecord{1c9e3a7 u0 com.example.notes/.sync.SyncForegroundService c:com.example.notes}
+    intent={cmp=com.example.notes/.sync.SyncForegroundService}
+    packageName=com.example.notes
+    processName=com.example.notes
+    targetSdkVersion=35
+    baseDir=/data/app/~~kX3n9Q2vJmT1bYp5Lr8aWg==/com.example.notes-Zx4cV7bN1mQ9wE2rT6yU8A==/base.apk
+    dataDir=/data/user/0/com.example.notes
+    app=ProcessRecord{a3f1c2e 12345:com.example.notes/u0a234}
+    useNewWiuLogic_forCapabilities()=true
+    useNewWiuLogic_forStart()=true
+    useNewBfslLogic()=true
+    mAllowWiu_noBinding=PROC_STATE_TOP
+    mAllowWiu_inBindService=DENIED
+    mAllowWiu_byBindings=DENIED
+    getFgsAllowWiu_legacy=PROC_STATE_TOP
+    getFgsAllowWiu_new=PROC_STATE_TOP
+    getFgsAllowWiu_forStart=PROC_STATE_TOP
+    getFgsAllowWiu_forCapabilities=PROC_STATE_TOP
+    allowUiJobScheduling=true
+    recentCallingPackage=com.example.notes
+    recentCallingUid=10234
+    mAllowStart_noBinding=PROC_STATE_TOP
+    mAllowStart_inBindService=DENIED
+    mAllowStart_byBindings=DENIED
+    getFgsAllowStart_legacy=PROC_STATE_TOP
+    getFgsAllowStart_new=PROC_STATE_TOP
+    getFgsAllowStart=PROC_STATE_TOP
+    startForegroundCount=1
+    infoAllowStartForeground=[callingPackage: com.example.notes; callingUid: 10234; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=com.example.notes/.sync.SyncForegroundService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+    isForeground=true foregroundId=1001 types=0x00000001 foregroundNoti=Notification(channel=sync_progress shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONGOING_EVENT|ONLY_ALERT_ONCE|FOREGROUND_SERVICE color=0x00000000 category=progress vis=PRIVATE)
+    createTime=-6m41s207ms startingBgTimeout=--
+    lastActivity=-6m41s190ms restartTime=-6m41s190ms createdFromFg=true
+    startRequested=true delayedStop=false stopIfKilled=false callStart=true lastStartId=1
+ startCommandResult=1
+
+  * ServiceRecord{8d2f4b0 u0 com.example.notes/.audio.VoiceNotePlaybackService c:com.example.notes}
+    intent={cmp=com.example.notes/.audio.VoiceNotePlaybackService}
+    packageName=com.example.notes
+    processName=com.example.notes
+    targetSdkVersion=35
+    baseDir=/data/app/~~kX3n9Q2vJmT1bYp5Lr8aWg==/com.example.notes-Zx4cV7bN1mQ9wE2rT6yU8A==/base.apk
+    dataDir=/data/user/0/com.example.notes
+    app=ProcessRecord{a3f1c2e 12345:com.example.notes/u0a234}
+    useNewWiuLogic_forCapabilities()=true
+    useNewWiuLogic_forStart()=true
+    useNewBfslLogic()=true
+    mAllowWiu_noBinding=PROC_STATE_TOP
+    mAllowWiu_inBindService=PROC_STATE_TOP
+    mAllowWiu_byBindings=DENIED
+    getFgsAllowWiu_legacy=PROC_STATE_TOP
+    getFgsAllowWiu_new=PROC_STATE_TOP
+    getFgsAllowWiu_forStart=PROC_STATE_TOP
+    getFgsAllowWiu_forCapabilities=PROC_STATE_TOP
+    allowUiJobScheduling=true
+    recentCallingPackage=com.example.notes
+    recentCallingUid=10234
+    mAllowStart_noBinding=PROC_STATE_TOP
+    mAllowStart_inBindService=PROC_STATE_TOP
+    mAllowStart_byBindings=DENIED
+    getFgsAllowStart_legacy=PROC_STATE_TOP
+    getFgsAllowStart_new=PROC_STATE_TOP
+    getFgsAllowStart=PROC_STATE_TOP
+    startForegroundCount=0
+    infoAllowStartForeground=[callingPackage: com.example.notes; callingUid: 10234; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=com.example.notes/.audio.VoiceNotePlaybackService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:true]
+    createTime=-1m12s48ms startingBgTimeout=--
+    lastActivity=-58s611ms restartTime=-1m12s40ms createdFromFg=true
+    startRequested=true delayedStop=false stopIfKilled=true callStart=true lastStartId=3
+ startCommandResult=2
+    Bindings:
+    * IntentBindRecord{4e5c6d1 CREATE}:
+      intent={cmp=com.example.notes/.audio.VoiceNotePlaybackService}
+      binder=android.os.BinderProxy@2b7a9f3
+      requested=true received=true hasBound=true doRebind=false
+      * Client AppBindRecord{9a8b7c6 ProcessRecord{a3f1c2e 12345:com.example.notes/u0a234}}
+        Per-process Connections:
+          ConnectionRecord{c0d4e18 u0 CR com.example.notes/.audio.VoiceNotePlaybackService:@7e8f9a0 flags=0x1}
+    All Connections:
+      ConnectionRecord{c0d4e18 u0 CR com.example.notes/.audio.VoiceNotePlaybackService:@7e8f9a0 flags=0x1}
+
+  User 10 active services:
+  * ServiceRecord{e7a10c5 u10 com.example.notes/.api.NotesApiService c:com.example.wear}
+    intent={act=com.example.notes.action.BIND_NOTES_API pkg=com.example.notes}
+    packageName=com.example.notes
+    processName=com.example.notes
+    targetSdkVersion=35
+    permission=com.example.notes.permission.BIND_NOTES_API
+    baseDir=/data/app/~~kX3n9Q2vJmT1bYp5Lr8aWg==/com.example.notes-Zx4cV7bN1mQ9wE2rT6yU8A==/base.apk
+    dataDir=/data/user/10/com.example.notes
+    app=ProcessRecord{6b0d9e4 15872:com.example.notes/u10a234}
+    useNewWiuLogic_forCapabilities()=true
+    useNewWiuLogic_forStart()=true
+    useNewBfslLogic()=true
+    mAllowWiu_noBinding=DENIED
+    mAllowWiu_inBindService=DENIED
+    mAllowWiu_byBindings=DENIED
+    getFgsAllowWiu_legacy=DENIED
+    getFgsAllowWiu_new=DENIED
+    getFgsAllowWiu_forStart=DENIED
+    getFgsAllowWiu_forCapabilities=DENIED
+    allowUiJobScheduling=false
+    recentCallingPackage=com.example.wear
+    recentCallingUid=1010187
+    mAllowStart_noBinding=DENIED
+    mAllowStart_inBindService=DENIED
+    mAllowStart_byBindings=DENIED
+    getFgsAllowStart_legacy=DENIED
+    getFgsAllowStart_new=DENIED
+    getFgsAllowStart=DENIED
+    startForegroundCount=0
+    infoAllowStartForeground=[callingPackage: com.example.wear; callingUid: 1010187; uidState: SVC ; uidBFSL: n/a; intent: Intent { act=com.example.notes.action.BIND_NOTES_API pkg=com.example.notes }; code:DENIED; tempAllowListReason:<null>; targetSdkVersion:35; callerTargetSdkVersion:34; startForegroundCount:0; bindFromPackage:null: isBindService:true]
+    createTime=-23m5s902ms startingBgTimeout=--
+    lastActivity=-23m5s880ms restartTime=-23m5s880ms createdFromFg=false
+    Bindings:
+    * IntentBindRecord{5f6a7b8 CREATE}:
+      intent={act=com.example.notes.action.BIND_NOTES_API pkg=com.example.notes}
+      binder=android.os.BinderProxy@91c3d2a
+      requested=true received=true hasBound=true doRebind=false
+      * Client AppBindRecord{3d2e1f0 ProcessRecord{f42a7c1 16020:com.example.wear/u10a187}}
+        Per-process Connections:
+          ConnectionRecord{b8c9d0e u10 CR com.example.notes/.api.NotesApiService:@44a55b6 flags=0x1}
+    All Connections:
+      ConnectionRecord{b8c9d0e u10 CR com.example.notes/.api.NotesApiService:@44a55b6 flags=0x1}
+
+  Connection bindings to services:
+  * ConnectionRecord{c0d4e18 u0 CR com.example.notes/.audio.VoiceNotePlaybackService:@7e8f9a0 flags=0x1}
+    binding=AppBindRecord{9a8b7c6 com.example.notes/.audio.VoiceNotePlaybackService:com.example.notes}
+    conn=android.os.BinderProxy@7e8f9a0 flags=0x1
+  * ConnectionRecord{b8c9d0e u10 CR com.example.notes/.api.NotesApiService:@44a55b6 flags=0x1}
+    binding=AppBindRecord{3d2e1f0 com.example.notes/.api.NotesApiService:com.example.wear}
+    conn=android.os.BinderProxy@44a55b6 flags=0x1
+
+Active foreground apps - user 0:
+  #0: com.example.notes
+    mLabel=Notes
+    mNumActive=1 mAppOnTop=false mShownWhileTop=true mShownWhileScreenOn=true
+    mStartTime=-6m41s150ms mStartVisibleTime=-6m41s150ms
