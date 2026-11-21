@@ -351,3 +351,12 @@ exemptions need `sys-whitelist` (not offered in v1).
   `QUERY_ALL_PACKAGES`, the Shizuku API permission and AndroidX's receiver permission (no
   `INTERNET`), `PicketUserService` and `IPicketService$Stub` survive R8, 3.5 MB. The APK carries only
   library baseline profiles until the workflow above has produced Picket's own.
+
+## D22 — The release key is created on the maintainer's computer (2026-11-21)
+
+- `scripts/setup-release-signing.sh` creates a PKCS12 keystore (RSA 4096, one password for store
+  and key, as PKCS12 requires) and sets the four secrets with `gh secret set`, reading every value
+  from stdin. The password comes from the terminal and never appears on a command line.
+- Rejected: generating the key in a cloud session or a workflow. The key would pass through a
+  transcript or a runner, and the maintainer would have no copy: secrets cannot be read back, and
+  an APK signed with a lost key can never be installed as an update over an existing Picket.

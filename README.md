@@ -227,6 +227,10 @@ every release installs over the previous one. MINOR and PATCH run from 0 to 99, 
 `scripts/release-dry-run.sh 0.1.0-rc1` rehearses the build and the APK checks of the release workflow
 locally with a throwaway key; nothing is tagged or published.
 
+Signing is set up once, on the maintainer's own computer: `scripts/setup-release-signing.sh` creates
+the keystore and stores the four repository secrets with `gh`. The keystore and its password need a
+backup outside GitHub, because secrets cannot be read back.
+
 ## Roadmap
 
 - Device-verified command matrix for more phones and Android versions (help welcome, see

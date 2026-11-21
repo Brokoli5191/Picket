@@ -15,6 +15,7 @@ Application id and root package: `app.brokoli5191.picket` (permanent, never chan
 ./gradlew spotlessApply                         # format; spotlessCheck in CI
 ./gradlew verifyNoInternetPermission            # merged manifests must not request INTERNET
 scripts/release-dry-run.sh 0.1.0-rc1            # release build + checks with a throwaway key
+scripts/setup-release-signing.sh               # one-time, maintainer only: keystore + repo secrets
 ./gradlew :app:generateBaselineProfile          # needs KVM (managed emulator); CI: baseline-profile.yml
 ```
 
