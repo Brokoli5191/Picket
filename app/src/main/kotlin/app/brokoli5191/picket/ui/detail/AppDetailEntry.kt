@@ -40,7 +40,9 @@ import app.brokoli5191.picket.ui.actions.OptionGroup
 import app.brokoli5191.picket.ui.actions.actionOptionsFor
 import app.brokoli5191.picket.ui.actions.openSystemScreen
 import app.brokoli5191.picket.ui.actions.touchesRestrictedSetting
+import app.brokoli5191.picket.ui.components.ExpandIcon
 import app.brokoli5191.picket.ui.components.SectionHeader
+import app.brokoli5191.picket.ui.components.itemMotion
 import app.brokoli5191.picket.ui.components.segmentedColors
 
 /** App detail with its actions, the confirmation dialog and a snackbar offering undo or a fallback. */
@@ -181,14 +183,8 @@ internal fun LazyListScope.actionItems(
                 onClick = { onPermissionsOpen(!permissionsOpen) },
                 shapes = ListItemDefaults.segmentedShapes(index = 0, count = 1),
                 colors = segmentedColors(),
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                trailingContent = {
-                    Icon(
-                        painterResource(if (permissionsOpen) R.drawable.ic_expand_less else R.drawable.ic_expand_more),
-                        contentDescription =
-                            stringResource(if (permissionsOpen) R.string.action_collapse else R.string.action_expand),
-                    )
-                },
+                modifier = itemMotion().padding(horizontal = 16.dp, vertical = 4.dp),
+                trailingContent = { ExpandIcon(permissionsOpen) },
             ) { Text(stringResource(R.string.action_group_permissions, permissions.size)) }
         }
         if (permissionsOpen) optionRows("permission", permissions, onSelect)
@@ -209,7 +205,7 @@ private fun LazyListScope.optionRows(
             onClick = { onSelect(option) },
             shapes = ListItemDefaults.segmentedShapes(index = index, count = options.size),
             colors = segmentedColors(),
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 1.dp),
+            modifier = itemMotion().padding(horizontal = 16.dp, vertical = 1.dp),
             supportingContent = option.argument?.let { { Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis) } },
         ) { Text(stringResource(option.label)) }
     }

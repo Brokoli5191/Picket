@@ -6,6 +6,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
@@ -29,6 +30,9 @@ import app.brokoli5191.picket.R
 import app.brokoli5191.picket.core.process.GroupKey
 import app.brokoli5191.picket.data.settings.AppSettings
 import app.brokoli5191.picket.privileged.client.PrivilegedState
+import app.brokoli5191.picket.ui.components.backTransition
+import app.brokoli5191.picket.ui.components.forwardTransition
+import app.brokoli5191.picket.ui.components.tabTransition
 import app.brokoli5191.picket.ui.connection.ConnectionScreen
 import app.brokoli5191.picket.ui.detail.AppDetailEntry
 import app.brokoli5191.picket.ui.detail.AppDetailViewModel
@@ -94,6 +98,9 @@ fun PicketApp(onOpenShizuku: () -> Unit) {
                 }
             },
         ) {
+            val motion = MaterialTheme.motionScheme
+            // Arriving at a top-level destination only happens by switching tabs: fade through.
+            val tabMetadata = NavDisplay.transitionSpec { tabTransition(motion) }
             NavDisplay(
                 backStack = backStack,
                 onBack = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) },
@@ -103,9 +110,12 @@ fun PicketApp(onOpenShizuku: () -> Unit) {
                         rememberViewModelStoreNavEntryDecorator(),
                     ),
                 sceneStrategies = listOf(rememberPicketSceneStrategy()),
+                transitionSpec = { forwardTransition(motion) },
+                popTransitionSpec = { backTransition(motion) },
+                predictivePopTransitionSpec = { backTransition(motion) },
                 entryProvider =
                     entryProvider {
-                        entry<ProcessesRoute>(metadata = listPaneMetadata()) {
+                        entry<ProcessesRoute>(metadata = listPaneMetadata() + tabMetadata) {
                             Privileged(R.string.nav_processes, onOpenShizuku) {
                                 val vm: ProcessesViewModel = viewModel(factory = AppViewModels.factory(container))
                                 val state by vm.state.collectAsStateWithLifecycle()
@@ -132,7 +142,7 @@ fun PicketApp(onOpenShizuku: () -> Unit) {
                                 AppDetailEntry(vm, onBack = { backStack.remove(route) })
                             }
                         }
-                        entry<WatchersRoute>(metadata = listPaneMetadata()) {
+                        entry<WatchersRoute>(metadata = listPaneMetadata() + tabMetadata) {
                             Privileged(R.string.nav_watchers, onOpenShizuku) {
                                 val vm: WatchersViewModel = viewModel(factory = AppViewModels.factory(container))
                                 val state by vm.state.collectAsStateWithLifecycle()
@@ -144,7 +154,7 @@ fun PicketApp(onOpenShizuku: () -> Unit) {
                                 })
                             }
                         }
-                        entry<WakeupsRoute>(metadata = listPaneMetadata()) {
+                        entry<WakeupsRoute>(metadata = listPaneMetadata() + tabMetadata) {
                             Privileged(R.string.nav_wakeups, onOpenShizuku) {
                                 val vm: WakeupsViewModel = viewModel(factory = AppViewModels.factory(container))
                                 val state by vm.state.collectAsStateWithLifecycle()
@@ -156,7 +166,7 @@ fun PicketApp(onOpenShizuku: () -> Unit) {
                                 })
                             }
                         }
-                        entry<SettingsRoute> {
+                        entry<SettingsRoute>(metadata = tabMetadata) {
                             SettingsEntry(settings) { backStack.add(it) }
                         }
                         entry<AppearanceRoute> {

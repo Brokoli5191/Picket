@@ -210,6 +210,33 @@ class LargeFontScreenshotTest {
         }
         compose.onRoot().captureRoboImage("font-200-watchers.png")
     }
+
+    /** The appearance choices have the longest button labels ("Follow system", "Expressive"). */
+    @Test
+    fun appearance() {
+        compose.setContent {
+            PicketTheme(appearance) {
+                Surface { AppearanceScreen(appearance, dynamicAvailable = true, onChange = {}, onBack = {}) }
+            }
+        }
+        compose.onRoot().captureRoboImage("font-200-appearance.png")
+    }
+
+    @Test
+    fun settings() {
+        compose.setContent {
+            PicketTheme(appearance) { Surface { SettingsScreen(AppSettings(), "0.1.0", SampleData.links, {}, {}, {}) } }
+        }
+        compose.onRoot().captureRoboImage("font-200-settings.png")
+    }
+
+    @Test
+    fun wakeups() {
+        compose.setContent {
+            PicketTheme(appearance) { Surface { WakeupsScreen(SampleData.wakeups, {}, onOpenApp = { _, _ -> }) } }
+        }
+        compose.onRoot().captureRoboImage("font-200-wakeups.png")
+    }
 }
 
 /** Plausible, invented data for screenshots and README images. */

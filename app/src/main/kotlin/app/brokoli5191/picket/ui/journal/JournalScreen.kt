@@ -51,6 +51,7 @@ import app.brokoli5191.picket.data.PlannedUndo
 import app.brokoli5191.picket.data.journal.JournalEntry
 import app.brokoli5191.picket.ui.actions.touchesRestrictedSetting
 import app.brokoli5191.picket.ui.components.NoticeCard
+import app.brokoli5191.picket.ui.components.itemMotion
 import app.brokoli5191.picket.ui.components.segmentedColors
 import app.brokoli5191.picket.ui.settings.InfoScaffold
 import kotlinx.coroutines.Dispatchers
@@ -233,7 +234,14 @@ fun JournalScreen(
                 }
             }
             itemsIndexed(rows, key = { _, r -> r.entry.id }) { index, row ->
-                JournalRowItem(row, timeFormat.format(Date(row.entry.timestampMs)), index, rows.size, onUndo)
+                JournalRowItem(
+                    row,
+                    timeFormat.format(Date(row.entry.timestampMs)),
+                    index,
+                    rows.size,
+                    onUndo,
+                    itemMotion(),
+                )
             }
         }
         SnackbarHost(snackbars, Modifier.align(Alignment.BottomCenter).padding(16.dp))
@@ -247,6 +255,7 @@ private fun JournalRowItem(
     index: Int,
     count: Int,
     onUndo: (Long) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val entry = row.entry
     val status =
@@ -260,7 +269,7 @@ private fun JournalRowItem(
     SegmentedListItem(
         shapes = ListItemDefaults.segmentedShapes(index = index, count = count),
         colors = segmentedColors(),
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 1.dp),
+        modifier = modifier.padding(horizontal = 16.dp, vertical = 1.dp),
         overlineContent = { Text(time + stringResource(R.string.separator) + stringResource(status)) },
         supportingContent = {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {

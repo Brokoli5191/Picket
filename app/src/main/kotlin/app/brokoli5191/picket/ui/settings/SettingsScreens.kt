@@ -50,6 +50,7 @@ import app.brokoli5191.picket.data.settings.Seeds
 import app.brokoli5191.picket.data.settings.ThemeMode
 import app.brokoli5191.picket.ui.components.SectionHeader
 import app.brokoli5191.picket.ui.components.segmentedColors
+import app.brokoli5191.picket.ui.expressive.ChoiceRow
 import app.brokoli5191.picket.ui.theme.rememberHaptics
 
 /** One entry of the settings list. */
@@ -98,26 +99,16 @@ fun SettingsScreen(
             }
             item { SectionHeader(stringResource(R.string.settings_section_sampling)) }
             item {
-                val labels =
-                    AppSettings.SAMPLING_CHOICES_MS.associateWith {
-                        stringResource(
-                            R.string.settings_seconds,
-                            it / 1000,
-                        )
-                    }
-                ButtonGroup(overflowIndicator = {}, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                    AppSettings.SAMPLING_CHOICES_MS.forEach { ms ->
-                        toggleableItem(
-                            checked = settings.samplingIntervalMs == ms,
-                            label = labels.getValue(ms),
-                            onCheckedChange = {
-                                haptics.tick()
-                                onSampling(ms)
-                            },
-                            weight = 1f,
-                        )
-                    }
-                }
+                ChoiceRow(
+                    options = AppSettings.SAMPLING_CHOICES_MS,
+                    selected = settings.samplingIntervalMs,
+                    label = { stringResource(R.string.settings_seconds, it / 1000) },
+                    onSelect = { ms ->
+                        haptics.tick()
+                        onSampling(ms)
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                )
             }
             item {
                 SwitchRow(
@@ -312,20 +303,13 @@ private fun <T> Choice(
     label: (T) -> Int,
     onSelect: (T) -> Unit,
 ) {
-    val labels = options.associateWith { stringResource(label(it)) }
-    ButtonGroup(
-        overflowIndicator = {},
+    ChoiceRow(
+        options = options,
+        selected = selected,
+        label = { stringResource(label(it)) },
+        onSelect = onSelect,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-    ) {
-        options.forEach { option ->
-            toggleableItem(
-                checked = option == selected,
-                label = labels.getValue(option),
-                onCheckedChange = { onSelect(option) },
-                weight = 1f,
-            )
-        }
-    }
+    )
 }
 
 @Composable

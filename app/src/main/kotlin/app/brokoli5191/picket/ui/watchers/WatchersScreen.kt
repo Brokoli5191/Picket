@@ -33,6 +33,7 @@ import app.brokoli5191.picket.core.model.WatcherKind
 import app.brokoli5191.picket.ui.components.AppIcon
 import app.brokoli5191.picket.ui.components.NoticeCard
 import app.brokoli5191.picket.ui.components.SectionHeader
+import app.brokoli5191.picket.ui.components.itemMotion
 import app.brokoli5191.picket.ui.components.segmentedColors
 import app.brokoli5191.picket.ui.expressive.BadgeShape
 import app.brokoli5191.picket.ui.expressive.DelayedLoadingIndicator
@@ -183,7 +184,7 @@ fun WatchersScreen(
             state.groups.forEach { group ->
                 val presentation = WatcherPresentation.of(group.kind)
                 item(key = "header-${group.kind}") {
-                    Column(Modifier.animateItem()) {
+                    Column(itemMotion()) {
                         SectionHeader(stringResource(presentation.title))
                         Text(
                             stringResource(presentation.explanation),
@@ -205,7 +206,7 @@ fun WatchersScreen(
                         index = index,
                         count = group.items.size,
                         onClick = { onOpenApp(item.uid, item.packageName) },
-                        modifier = Modifier.animateItem().padding(horizontal = 16.dp, vertical = 1.dp),
+                        modifier = itemMotion().padding(horizontal = 16.dp, vertical = 1.dp),
                     )
                 }
             }

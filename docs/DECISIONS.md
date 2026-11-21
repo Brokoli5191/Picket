@@ -376,3 +376,24 @@ exemptions need `sys-whitelist` (not offered in v1).
   After four seconds of "Connecting…" the screen already offers "Try again".
 - Rejected: shortening the wait to a few seconds (a cold helper start on a busy phone can take
   several), and retrying forever (it hides a broken Shizuku setup behind a spinner).
+
+## D24 — Spring motion, and choice rows that never clip a label (2026-11-21)
+
+- **Motion:** every animation takes its spec from `MaterialTheme.motionScheme`, so the Motion
+  setting decides: "Full" gets the Expressive springs with a light overshoot, "Reduced" the standard
+  ones, "Off" none. Movement uses the default spatial spring and only collapsing the fast one; fades
+  use the effects springs, which never overshoot. A new screen slides in a quarter of the width while
+  the old one steps back an eighth; back is the mirror image and also drives predictive back. Tabs
+  fade through with a 4 % grow and no direction. List items animate placement, entry and exit;
+  expandable rows grow and their chevron turns. The helpers live in `ui/components/Motion.kt`.
+- Rejected: full-width slides and shared-element transitions (more movement than a tool used in
+  short bursts needs), and the fast spatial spring for everything (it makes the overshoot twitchy).
+- **Choice rows:** `ButtonGroup`, and then `FlowRow` with `weight(1f)`, clipped labels at 200 %
+  font. FlowRow picks its line breaks from the buttons' widths but then gives every weighted button
+  an equal share, which was 25 px narrower than "Memory" on a 411 dp screen. `EvenFlowRow` measures
+  each button's one-line width, packs rows greedily, rebalances them (two and two rather than three
+  and one) and shares each row equally, except that a button wider than the share keeps its width.
+  A label wider than the whole row wraps instead of being clipped. `ChoiceRowTest` checks every
+  label at three widths at 200 % font and fails on the old layout.
+- Rejected: an ellipsis (hides what the option is), shrinking the text (illegible exactly for the
+  people who chose the large font), a dropdown at large font sizes (an extra tap for them).
