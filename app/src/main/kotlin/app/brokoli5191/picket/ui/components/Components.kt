@@ -1,48 +1,32 @@
 package app.brokoli5191.picket.ui.components
 
-import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toBitmap
 import app.brokoli5191.picket.R
 import app.brokoli5191.picket.ui.theme.LocalMotionLevel
 import app.brokoli5191.picket.ui.theme.MotionLevel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 /**
  * A live number with tabular figures. With full motion, changed values roll vertically
@@ -74,40 +58,6 @@ fun RollingNumber(
         },
         label = "number",
     ) { (value, _) -> Text(value, style = tabular, color = color) }
-}
-
-/** The launcher icon of [packageName], loaded off the main thread; a neutral placeholder otherwise. */
-@Composable
-fun AppIcon(
-    packageName: String?,
-    modifier: Modifier = Modifier,
-) {
-    val context = LocalContext.current
-    val preview = LocalInspectionMode.current
-    val drawable by produceState<Drawable?>(null, packageName) {
-        if (packageName != null && !preview) {
-            value =
-                withContext(Dispatchers.IO) {
-                    runCatching { context.packageManager.getApplicationIcon(packageName) }.getOrNull()
-                }
-        }
-    }
-    val icon = drawable
-    Box(modifier.size(40.dp).clip(CircleShape), contentAlignment = Alignment.Center) {
-        if (icon != null) {
-            Image(icon.toBitmap(96, 96).asImageBitmap(), contentDescription = null, modifier = Modifier.size(40.dp))
-        } else {
-            Surface(color = MaterialTheme.colorScheme.surfaceContainerHighest, modifier = Modifier.size(40.dp)) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        painterResource(R.drawable.ic_memory),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-            }
-        }
-    }
 }
 
 @Composable
