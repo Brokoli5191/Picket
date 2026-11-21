@@ -50,9 +50,13 @@ import app.brokoli5191.picket.core.process.Importance
 import app.brokoli5191.picket.core.process.ProcessRow
 import app.brokoli5191.picket.core.process.SortOrder
 import app.brokoli5191.picket.ui.components.AppIcon
+import app.brokoli5191.picket.ui.components.ExpandIcon
+import app.brokoli5191.picket.ui.components.ExpandableContent
 import app.brokoli5191.picket.ui.components.NoticeCard
 import app.brokoli5191.picket.ui.components.RollingNumber
+import app.brokoli5191.picket.ui.components.itemMotion
 import app.brokoli5191.picket.ui.components.segmentedColors
+import app.brokoli5191.picket.ui.expressive.ChoiceRow
 import app.brokoli5191.picket.ui.expressive.DelayedLoadingIndicator
 import app.brokoli5191.picket.ui.theme.rememberHaptics
 
@@ -130,7 +134,7 @@ fun ProcessesScreen(
                             expanded[group.key] = next
                         },
                         onOpen = { onOpenApp(group) },
-                        modifier = Modifier.animateItem().padding(horizontal = 16.dp, vertical = 1.dp),
+                        modifier = itemMotion().padding(horizontal = 16.dp, vertical = 1.dp),
                     )
                 }
             }
@@ -188,20 +192,16 @@ private fun Controls(
             leadingIcon = { Icon(painterResource(R.drawable.ic_search), contentDescription = null) },
             placeholder = { Text(stringResource(R.string.processes_search)) },
         )
-        val labels = SortOrder.entries.associateWith { sortLabel(it) }
-        ButtonGroup(overflowIndicator = {}, modifier = Modifier.fillMaxWidth()) {
-            SortOrder.entries.forEach { order ->
-                toggleableItem(
-                    checked = state.sort == order,
-                    label = labels.getValue(order),
-                    onCheckedChange = {
-                        tick()
-                        onSort(order)
-                    },
-                    weight = 1f,
-                )
-            }
-        }
+        ChoiceRow(
+            options = SortOrder.entries,
+            selected = state.sort,
+            label = { sortLabel(it) },
+            onSelect = { order ->
+                tick()
+                onSort(order)
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
         state.error?.let { NoticeCard(stringResource(R.string.error_title), it.message, error = true) }
         if (showDebug) {
             state.timing?.let { t ->
@@ -258,21 +258,13 @@ private fun GroupItem(
                             style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
                         )
                     }
-                    IconButton(onClick = onToggle) {
-                        Icon(
-                            painterResource(if (expanded) R.drawable.ic_expand_less else R.drawable.ic_expand_more),
-                            contentDescription =
-                                stringResource(
-                                    if (expanded) R.string.action_collapse else R.string.action_expand,
-                                ),
-                        )
-                    }
+                    IconButton(onClick = onToggle) { ExpandIcon(expanded) }
                 }
             },
         ) {
             Text(groupTitle(group), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        if (expanded) {
+        ExpandableContent(expanded) {
             Column(Modifier.padding(start = 72.dp, end = 16.dp, bottom = 8.dp)) {
                 group.processes.forEach { ProcessLine(it) }
             }

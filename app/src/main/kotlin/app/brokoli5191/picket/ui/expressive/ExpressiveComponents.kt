@@ -7,10 +7,13 @@ package app.brokoli5191.picket.ui.expressive
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
@@ -25,9 +28,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.SceneStrategy
+import app.brokoli5191.picket.ui.components.EvenFlowRow
 import kotlinx.coroutines.delay
 
 /*
@@ -89,3 +97,32 @@ fun rememberPicketSceneStrategy(): SceneStrategy<NavKey> = rememberListDetailSce
 fun listPaneMetadata(): Map<String, Any> = ListDetailSceneStrategy.listPane()
 
 fun detailPaneMetadata(): Map<String, Any> = ListDetailSceneStrategy.detailPane()
+
+/**
+ * Single choice from a few options, as Expressive toggle buttons that morph when pressed and when
+ * selected. Unlike ButtonGroup, a label never gets cut off or dropped: [EvenFlowRow] keeps every
+ * button at least as wide as its label and wraps to further rows when they do not fit side by side
+ * (narrow screens, large fonts, long labels).
+ */
+@Composable
+fun <T> ChoiceRow(
+    options: List<T>,
+    selected: T,
+    label: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    EvenFlowRow(modifier = modifier.selectableGroup()) {
+        options.forEach { option ->
+            val checked = option == selected
+            ToggleButton(
+                checked = checked,
+                onCheckedChange = { if (!checked) onSelect(option) },
+                modifier = Modifier.semantics { role = Role.RadioButton },
+            ) {
+                // Wraps only if a single label is wider than the whole row; never clipped.
+                Text(label(option), textAlign = TextAlign.Center)
+            }
+        }
+    }
+}

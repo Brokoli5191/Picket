@@ -1,11 +1,6 @@
 package app.brokoli5191.picket.ui.connection
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,10 +25,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import app.brokoli5191.picket.R
 import app.brokoli5191.picket.privileged.client.PrivilegedState
+import app.brokoli5191.picket.ui.components.ExpandableContent
 import app.brokoli5191.picket.ui.expressive.DelayedLoadingIndicator
 import kotlinx.coroutines.delay
 
@@ -124,12 +119,7 @@ private fun SlowConnectionHint(
             slow = true
         }
     }
-    val motion = MaterialTheme.motionScheme
-    AnimatedVisibility(
-        visible = waiting && slow,
-        enter = fadeIn(motion.defaultEffectsSpec()) + expandVertically(motion.defaultSpatialSpec<IntSize>()),
-        exit = fadeOut(motion.fastEffectsSpec()) + shrinkVertically(motion.fastSpatialSpec<IntSize>()),
-    ) {
+    ExpandableContent(visible = waiting && slow) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(stringResource(R.string.connection_slow), style = MaterialTheme.typography.bodyMedium)
             OutlinedButton(onClick = onRetry) { Text(stringResource(R.string.connection_action_retry)) }

@@ -35,7 +35,9 @@ import app.brokoli5191.picket.core.model.WakeupKind
 import app.brokoli5191.picket.ui.components.AppIcon
 import app.brokoli5191.picket.ui.components.NoticeCard
 import app.brokoli5191.picket.ui.components.SectionHeader
+import app.brokoli5191.picket.ui.components.itemMotion
 import app.brokoli5191.picket.ui.components.segmentedColors
+import app.brokoli5191.picket.ui.expressive.ChoiceRow
 import app.brokoli5191.picket.ui.expressive.DelayedLoadingIndicator
 import app.brokoli5191.picket.ui.theme.rememberHaptics
 
@@ -93,23 +95,16 @@ fun WakeupsScreen(
     ) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 24.dp)) {
             item(key = "window") {
-                val labels = WakeupWindow.entries.associateWith { stringResource(R.string.wakeups_window, it.hours) }
-                ButtonGroup(
-                    overflowIndicator = {},
+                ChoiceRow(
+                    options = WakeupWindow.entries,
+                    selected = state.window,
+                    label = { stringResource(R.string.wakeups_window, it.hours) },
+                    onSelect = { window ->
+                        haptics.tick()
+                        onWindow(window)
+                    },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                ) {
-                    WakeupWindow.entries.forEach { window ->
-                        toggleableItem(
-                            checked = state.window == window,
-                            label = labels.getValue(window),
-                            onCheckedChange = {
-                                haptics.tick()
-                                onWindow(window)
-                            },
-                            weight = 1f,
-                        )
-                    }
-                }
+                )
             }
             state.error?.let {
                 item(
@@ -155,7 +150,7 @@ fun WakeupsScreen(
                     onClick = { onOpenApp(row.uid, row.packageName) },
                     shapes = ListItemDefaults.segmentedShapes(index = index, count = state.offenders.size),
                     colors = segmentedColors(),
-                    modifier = Modifier.animateItem().padding(horizontal = 16.dp, vertical = 1.dp),
+                    modifier = itemMotion().padding(horizontal = 16.dp, vertical = 1.dp),
                     leadingContent = { AppIcon(row.packageName) },
                     supportingContent = {
                         Column {
