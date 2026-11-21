@@ -12,10 +12,23 @@ die() { echo "error: $*" >&2; exit 1; }
 info() { echo "==> $*" >&2; }
 
 require_device() {
-  command -v "$ADB" > /dev/null 2>&1 || die "adb not found (set ADB=/path/to/adb or add platform-tools to PATH)"
-  local state
-  state="$("$ADB" get-state 2> /dev/null)" || die "no device connected (adb get-state failed)"
-  [[ "$state" == "device" ]] || die "device state is '$state', expected 'device'"
+  command -v "$ADB" > /dev/null 2>&1 ||
+    die "adb not found. Debian/Ubuntu: sudo apt install adb; Fedora/Arch: install android-tools (or set ADB=/path/to/adb)"
+  local devices count state
+  devices="$("$ADB" devices 2> /dev/null | sed -n '2,$p' | sed '/^[[:space:]]*$/d')"
+  count="$(printf '%s' "$devices" | grep -c . || true)"
+  if [[ -z "${ANDROID_SERIAL:-}" ]] && ((count > 1)); then
+    printf '%s\n' "$devices" >&2
+    die "more than one device: pick one with ANDROID_SERIAL=<serial> $0"
+  fi
+  ((count > 0)) || die "no device found: enable USB debugging (or connect wireless debugging) and check 'adb devices'"
+  state="$("$ADB" get-state 2>&1)"
+  case "$state" in
+    device) ;;
+    *unauthorized*) die "the phone has not allowed this computer yet: unlock it and confirm the USB debugging prompt" ;;
+    *offline*) die "the device is offline: reconnect the cable or run 'adb kill-server' and try again" ;;
+    *) die "unexpected device state: $state" ;;
+  esac
 }
 
 # Runs a command on the device without a PTY (byte-exact output, no CRLF) and keeps stdout,
