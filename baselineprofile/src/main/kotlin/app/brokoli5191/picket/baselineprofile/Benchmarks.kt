@@ -7,7 +7,6 @@ import androidx.benchmark.macro.StartupMode
 import androidx.benchmark.macro.StartupTimingMetric
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.uiautomator.By
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,7 +65,8 @@ class ScrollBenchmark {
             setupBlock = {
                 pressHome()
                 startActivityAndWait()
-                if (device.hasObject(By.text(SHIZUKU_MISSING))) {
+                // The connection screen settles on its final state shortly after start.
+                if (shows(SHIZUKU_MISSING)) {
                     tap("Settings")
                     tap("Protected apps")
                 }
