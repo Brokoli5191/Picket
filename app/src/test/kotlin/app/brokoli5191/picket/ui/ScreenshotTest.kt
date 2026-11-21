@@ -645,6 +645,28 @@ class StateScreenshotTest {
             ),
         )
 
+    @Test
+    fun connectionPermission() = captureConnection("connection-permission.png", PrivilegedState.PermissionRequired)
+
+    @Test
+    fun connectionFailed() =
+        captureConnection(
+            "connection-failed.png",
+            PrivilegedState.Failed("The privileged helper did not start within 10 seconds."),
+        )
+
+    private fun captureConnection(
+        name: String,
+        state: PrivilegedState,
+    ) {
+        compose.setContent {
+            PicketTheme(appearance) {
+                Surface { ConnectionScreen(state, app.brokoli5191.picket.R.string.nav_processes, {}, {}, {}) }
+            }
+        }
+        compose.onRoot().captureRoboImage(name)
+    }
+
     private fun capture(
         name: String,
         state: ProcessesUiState,

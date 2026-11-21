@@ -412,3 +412,17 @@ exemptions need `sys-whitelist` (not offered in v1).
   result, with its expand and open actions), keeping the large title (costs a row for information
   the navigation bar shows), and sort in the floating toolbar (at 200 % font the toolbar would no
   longer fit on a 360 dp screen).
+
+## D26 — Setup as three steps (2026-11-21)
+
+- **Problem:** the connection screen showed one card for the current state ("Shizuku is not
+  running", "Allow Picket to use Shizuku", …). A first-time user did not see how far along they were
+  or what would come after the button.
+- **Choice:** three steps in one card — install Shizuku, start it, allow Picket — each with a check
+  once done, the next one with its explanation and its single action, and the later ones greyed
+  out. Once all three are done, a second card shows the helper connecting (with "Try again" after
+  four seconds) or its failure. A Shizuku that is too old counts as step one ("Update Shizuku").
+  The mapping from `PrivilegedState` to steps is a pure function with its own test.
+- Rejected: a separate onboarding flow with pages (the steps can regress at any time, for example
+  after a reboot stops Shizuku, so the guidance has to live where the user lands, not in a one-off
+  tour), and a horizontal stepper (three labels do not fit side by side at large font sizes).
