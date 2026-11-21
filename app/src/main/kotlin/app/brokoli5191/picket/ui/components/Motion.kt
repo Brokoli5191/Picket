@@ -9,6 +9,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -63,9 +64,15 @@ fun ExpandableContent(
     ) { content() }
 }
 
-/** Expand/collapse chevron that turns instead of swapping icons. */
+/**
+ * Expand/collapse chevron that turns instead of swapping icons. [decorative] drops the spoken label,
+ * for a chevron inside a button whose text already says what it does.
+ */
 @Composable
-fun ExpandIcon(expanded: Boolean) {
+fun ExpandIcon(
+    expanded: Boolean,
+    decorative: Boolean = false,
+) {
     val rotation by animateFloatAsState(
         targetValue = if (expanded) 180f else 0f,
         animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
@@ -73,9 +80,30 @@ fun ExpandIcon(expanded: Boolean) {
     )
     Icon(
         painterResource(R.drawable.ic_expand_more),
-        contentDescription = stringResource(if (expanded) R.string.action_collapse else R.string.action_expand),
+        contentDescription =
+            if (decorative) {
+                null
+            } else {
+                stringResource(
+                    if (expanded) R.string.action_collapse else R.string.action_expand,
+                )
+            },
         modifier = Modifier.rotate(rotation),
     )
+}
+
+/** A small element such as a status badge: it pops in on the spatial spring and fades out quickly. */
+@Composable
+fun PopContent(
+    visible: Boolean,
+    content: @Composable () -> Unit,
+) {
+    val motion = MaterialTheme.motionScheme
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(motion.defaultEffectsSpec()) + scaleIn(motion.defaultSpatialSpec(), initialScale = 0.8f),
+        exit = fadeOut(motion.fastEffectsSpec()) + scaleOut(motion.fastSpatialSpec(), targetScale = 0.8f),
+    ) { content() }
 }
 
 /** Opening a screen: it slides in a quarter of the width on a spring while the old one steps back. */
