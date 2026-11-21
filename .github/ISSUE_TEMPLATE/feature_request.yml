@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest something Picket should show or be able to do.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What do you want to find out or change on your device?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How could Picket help?
+      description: If you know the shell command or system API involved, mention it.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This works without root (shell privileges via Shizuku are enough).
+        - label: This does not need network access.
