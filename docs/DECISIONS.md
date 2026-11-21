@@ -313,3 +313,41 @@ exemptions need `sys-whitelist` (not offered in v1).
   cannot remove a non-test device admin and the current keyboard is protected.
 - **Stop service** is only offered for started services: `stop-service` ends the started state, a
   service that is only bound keeps running regardless.
+
+## D21 — Baseline profile, benchmarks and the release rehearsal (2026-11-20)
+
+- **Module** `:baselineprofile` (`com.android.test` + `androidx.baselineprofile` 1.5.0): one
+  generator (`BaselineProfileRule`, also writes the startup profile for DEX layout) and two
+  Macrobenchmarks, cold start and list scrolling, each with `CompilationMode.None` against
+  `Partial(BaselineProfileMode.Require)`.
+- **Where it runs**: a Gradle Managed Device (Pixel 6, API 34, `aosp` image; `aosp-atd` is meant for
+  instrumented tests, profile collection wants the full image) in the manual
+  `.github/workflows/baseline-profile.yml`. The job enables `/dev/kvm` with the udev rule GitHub
+  documents for hosted Linux runners and **stops if KVM is missing or not accessible**, instead of
+  crawling on a software emulator. This container has no KVM, so no profile is committed yet.
+- **What the profile covers**: the emulator has no Shizuku, so the three privileged tabs show the
+  connection screen and the scrolled lists come from Settings (protected apps, appearance,
+  licences). They use the same list, top-bar and navigation components as the process list. On a
+  device with Shizuku running, `-Ppicket.profileOnDevice=true` runs the same journey against the
+  real process list. Rejected: a demo backend with fake data compiled into release builds.
+- **Build types** `benchmarkRelease` and `nonMinifiedRelease` (created by the plugin from `release`)
+  are signed with the debug key and get the id `app.brokoli5191.picket.benchmark`: the workflow has
+  no signing secrets, and the builds install next to a real release on the maintainer's phone. The
+  release signing guard is unchanged and still fails `release` builds without the secrets.
+  `profileinstaller` compiles the profile on sideloaded installs, which matters because Picket is
+  not distributed through Play.
+- **Delivery**: the workflow commits a changed profile to `baseline-profile/run-<id>` and opens a
+  pull request labelled `maintenance`. That needs "Allow GitHub Actions to create and approve pull
+  requests" in the repository settings, and pull requests opened with the workflow token do not
+  start CI (close and reopen). Emulator benchmark numbers are a smoke test only.
+- **Release rehearsal**: `scripts/release-dry-run.sh` repeats the version rules, the Gradle call
+  and the APK checks of `release.yml` with a throwaway PKCS12 key in a temporary directory, plus
+  checks the workflow does not make (no `INTERNET`, R8 kept `PicketUserService` and the AIDL stub,
+  baseline profile present). Not rehearsed: the secrets check, the tag checks against GitHub,
+  attestation and publishing. The real `release.yml` is only dispatched when the maintainer asks.
+
+  Result of the rehearsal for `0.1.0-rc1` (2026-11-20, this container): versionCode 10001, signature
+  verified (APK Signature Scheme v2, minSdk 29 needs no v1), badging matches, permissions are
+  `QUERY_ALL_PACKAGES`, the Shizuku API permission and AndroidX's receiver permission (no
+  `INTERNET`), `PicketUserService` and `IPicketService$Stub` survive R8, 3.5 MB. The APK carries only
+  library baseline profiles until the workflow above has produced Picket's own.
