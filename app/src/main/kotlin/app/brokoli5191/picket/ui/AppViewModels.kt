@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import app.brokoli5191.picket.AppContainer
 import app.brokoli5191.picket.data.ProcessSampler
 import app.brokoli5191.picket.ui.detail.AppDetailViewModel
+import app.brokoli5191.picket.ui.journal.JournalViewModel
 import app.brokoli5191.picket.ui.navigation.AppDetailRoute
 import app.brokoli5191.picket.ui.processes.ProcessesViewModel
 import app.brokoli5191.picket.ui.wakeups.WakeupsViewModel
@@ -29,6 +30,7 @@ object AppViewModels {
             }
             initializer { WatchersViewModel(container.watchersRepository, container.packageCatalog) }
             initializer { WakeupsViewModel(container.wakeupsRepository, container.packageCatalog) }
+            initializer { JournalViewModel(container.actionsRepository) }
         }
 
     fun detailFactory(
@@ -45,6 +47,7 @@ object AppViewModels {
                     details = container.appDetailRepository,
                     watchers = container.watchersRepository,
                     wakeups = container.wakeupsRepository,
+                    actions = container.actionsRepository,
                 )
             }
         }

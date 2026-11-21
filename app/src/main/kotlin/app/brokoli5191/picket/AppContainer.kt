@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.datastore.preferences.preferencesDataStore
+import app.brokoli5191.picket.data.ActionsRepository
 import app.brokoli5191.picket.data.AppDetailRepository
 import app.brokoli5191.picket.data.PackageCatalog
 import app.brokoli5191.picket.data.WakeupsRepository
 import app.brokoli5191.picket.data.WatchersRepository
+import app.brokoli5191.picket.data.journal.JournalDatabase
 import app.brokoli5191.picket.data.settings.SettingsRepository
 import app.brokoli5191.picket.privileged.client.PrivilegedClient
 import kotlinx.coroutines.CoroutineScope
@@ -47,6 +49,11 @@ class AppContainer(
     val wakeupsRepository = WakeupsRepository { windowMs -> privilegedClient.wakeups(windowMs) }
 
     val appDetailRepository = AppDetailRepository { pkg, userId -> privilegedClient.appDetail(pkg, userId) }
+
+    /** Opened lazily: the first query runs off the main thread, Room refuses main-thread access. */
+    val journalDatabase: JournalDatabase by lazy { JournalDatabase.create(appContext) }
+
+    val actionsRepository: ActionsRepository by lazy { ActionsRepository(privilegedClient, journalDatabase.journal()) }
 
     private companion object {
         /**
