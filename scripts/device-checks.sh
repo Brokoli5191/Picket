@@ -122,25 +122,25 @@ pid_of_target() { x pidof "$PKG"; printf '%s' "$OUT"; }
 section "Force stop"
 start_target fgs
 before="$(pid_of_target)"
-x am force-stop --user "$USER_ID" "$PKG"
+x cmd activity force-stop --user "$USER_ID" "$PKG"
 rc=$RC
 after="$(pid_of_target)"
 verdict=FAIL
 [[ $rc -eq 0 && -n "$before" && -z "$after" ]] && verdict=PASS
-row "Force stop" "am force-stop --user $USER_ID $PKG" "$rc" "pid '$before' → '$after'" "–" "–" "$verdict" ""
+row "Force stop" "cmd activity force-stop --user $USER_ID $PKG" "$rc" "pid '$before' → '$after'" "–" "–" "$verdict" ""
 
 # ---- 2. kill background processes -------------------------------------------------------------------
 section "Kill background processes"
 start_target "" 5
 before="$(pid_of_target)"
-x am kill --user "$USER_ID" "$PKG"
+x cmd activity kill --user "$USER_ID" "$PKG"
 rc=$RC
 sleep 1
 after="$(pid_of_target)"
 verdict=FAIL
 [[ $rc -eq 0 && -n "$before" && -z "$after" ]] && verdict=PASS
 [[ $rc -eq 0 && -n "$after" ]] && verdict=NO-EFFECT
-row "Kill background processes" "am kill --user $USER_ID $PKG" "$rc" "pid '$before' → '$after'" "–" "–" "$verdict" "only cached/background processes are killable"
+row "Kill background processes" "cmd activity kill --user $USER_ID $PKG" "$rc" "pid '$before' → '$after'" "–" "–" "$verdict" "only cached/background processes are killable"
 x am force-stop "$PKG"
 
 # ---- 3. stop a specific service ---------------------------------------------------------------------
@@ -148,7 +148,7 @@ section "Stop service"
 start_target fgs
 x dumpsys activity services "$PKG"
 before="$(contains "$OUT" "DummyForegroundService" && echo running || echo absent)"
-x am stopservice --user "$USER_ID" -n "$FGS"
+x cmd activity stop-service --user "$USER_ID" -n "$FGS"
 rc=$RC # 255 for every outcome; the message decides
 stop_out="$(oneline "$OUT $ERR")"
 sleep 1
@@ -157,7 +157,7 @@ after="$(contains "$OUT" "DummyForegroundService" && echo running || echo absent
 verdict=FAIL
 [[ "$before" == running && "$after" == absent ]] && verdict=PASS
 [[ "$stop_out" == *"Service stopped"* ]] || verdict=FAIL
-row "Stop service" "am stopservice --user $USER_ID -n $FGS" "$rc" "$before → $after ($stop_out)" "–" "–" "$verdict" "exit is 255 even on success; only exported services; fallback: force stop"
+row "Stop service" "cmd activity stop-service --user $USER_ID -n $FGS" "$rc" "$before → $after ($stop_out)" "–" "–" "$verdict" "exit is 255 even on success; only exported services; fallback: force stop"
 x am force-stop "$PKG"
 
 # ---- 4. restrict background execution ---------------------------------------------------------------
@@ -183,19 +183,19 @@ x am get-standby-bucket --user "$USER_ID" "$PKG"
 before="$(oneline "$OUT")"
 bucket=restricted
 [[ "$api" -lt 30 ]] && bucket=rare
-x am set-standby-bucket --user "$USER_ID" "$PKG" "$bucket"
+x cmd activity set-standby-bucket --user "$USER_ID" "$PKG" "$bucket"
 rc=$RC
 x am get-standby-bucket --user "$USER_ID" "$PKG"
 after="$(oneline "$OUT")"
 restore_to="$before"
 [[ "$restore_to" =~ ^[0-9]+$ ]] || restore_to=active
-x am set-standby-bucket --user "$USER_ID" "$PKG" "$restore_to"
+x cmd activity set-standby-bucket --user "$USER_ID" "$PKG" "$restore_to"
 inv_rc=$RC
 x am get-standby-bucket --user "$USER_ID" "$PKG"
 restored="$(oneline "$OUT")"
 verdict=FAIL
 [[ $rc -eq 0 && "$after" != "$before" && $inv_rc -eq 0 && "$restored" == "$before" ]] && verdict=PASS
-row "Standby bucket → $bucket" "am set-standby-bucket --user $USER_ID $PKG $bucket" "$rc" "'$before' → '$after'" \
+row "Standby bucket → $bucket" "cmd activity set-standby-bucket --user $USER_ID $PKG $bucket" "$rc" "'$before' → '$after'" \
   "\`… $restore_to\` (exit $inv_rc)" "'$restored'" "$verdict" "previous bucket from journal"
 
 # ---- 6. notification listener ------------------------------------------------------------------------
@@ -229,10 +229,11 @@ before="$(contains "$OUT" "DummyAccessibilityService" && echo bound || echo unbo
 # The action: remove only our entry, keep every other one exactly as it was.
 x settings get secure enabled_accessibility_services
 without="$(printf '%s' "$OUT" | tr ':' '\n' | grep -v -x -e "$A11Y" -e "$A11Y_FULL" | paste -sd ':' -)"
+# Same argv as Picket: `cmd settings`, which /system/bin/settings only wraps.
 if [[ -z "$without" ]]; then
-  x settings --user "$USER_ID" delete secure enabled_accessibility_services
+  x cmd settings --user "$USER_ID" delete secure enabled_accessibility_services
 else
-  x settings --user "$USER_ID" put secure enabled_accessibility_services "$without"
+  x cmd settings --user "$USER_ID" put secure enabled_accessibility_services "$without"
 fi
 rc=$RC
 sleep 2
@@ -240,14 +241,14 @@ x dumpsys accessibility
 after="$(contains "$OUT" "DummyAccessibilityService" && echo bound || echo unbound)"
 x settings get secure enabled_accessibility_services
 others_kept="$([[ "$OUT" == "${ORIG_A11Y}" || (-z "$without" && "$OUT" == "null") ]] && echo "others kept" || echo "CHANGED: $(oneline "$OUT")")"
-x settings --user "$USER_ID" put secure enabled_accessibility_services "$with_target"
+x cmd settings --user "$USER_ID" put secure enabled_accessibility_services "$with_target"
 inv_rc=$RC
 sleep 2
 x dumpsys accessibility
 restored="$(contains "$OUT" "DummyAccessibilityService" && echo bound || echo unbound)"
 verdict=FAIL
 [[ $rc -eq 0 && "$before" == bound && "$after" == unbound && "$restored" == bound && "$others_kept" == "others kept" ]] && verdict=PASS
-row "Disable accessibility service" "settings --user $USER_ID put secure enabled_accessibility_services <others>" "$rc" \
+row "Disable accessibility service" "cmd settings --user $USER_ID put secure enabled_accessibility_services <others>" "$rc" \
   "$before → $after, $others_kept" "\`put … <previous value>\` (exit $inv_rc)" "$restored" "$verdict" ""
 
 # ---- 8. runtime permission ---------------------------------------------------------------------------
@@ -255,7 +256,7 @@ section "Runtime permission"
 x pm grant --user "$USER_ID" "$PKG" "$PERM"
 perm_state() { x dumpsys package "$PKG"; printf '%s' "$OUT" | grep -m1 "$PERM: granted=" | sed -E 's/.*granted=([a-z]+).*/\1/'; }
 before="$(perm_state)"
-x pm revoke --user "$USER_ID" "$PKG" "$PERM"
+x cmd package revoke --user "$USER_ID" "$PKG" "$PERM"
 rc=$RC
 after="$(perm_state)"
 x pm grant --user "$USER_ID" "$PKG" "$PERM"
@@ -264,7 +265,7 @@ restored="$(perm_state)"
 x pm revoke --user "$USER_ID" "$PKG" "$PERM"
 verdict=FAIL
 [[ $rc -eq 0 && "$before" == true && "$after" == false && "$restored" == true ]] && verdict=PASS
-row "Revoke runtime permission" "pm revoke --user $USER_ID $PKG $PERM" "$rc" "granted=$before → $after" \
+row "Revoke runtime permission" "cmd package revoke --user $USER_ID $PKG $PERM" "$rc" "granted=$before → $after" \
   "\`pm grant …\` (exit $inv_rc)" "granted=$restored" "$verdict" ""
 
 # ---- 9. app-ops (overlay, usage access) --------------------------------------------------------------
@@ -347,7 +348,7 @@ row "Revoke DND access" "cmd notification disallow_dnd $PKG $USER_ID" "$rc" "$be
 section "Disable for user"
 disabled() { x pm list packages -d --user "$USER_ID" "$PKG"; contains "$OUT" "package:$PKG" && echo disabled || echo enabled; }
 before="$(disabled)"
-x pm disable-user --user "$USER_ID" "$PKG"
+x cmd package disable-user --user "$USER_ID" "$PKG"
 rc=$RC
 disable_out="$(oneline "$OUT")"
 after="$(disabled)"
@@ -356,10 +357,10 @@ inv_rc=$RC
 restored="$(disabled)"
 verdict=FAIL
 [[ $rc -eq 0 && "$before" == enabled && "$after" == disabled && "$restored" == enabled ]] && verdict=PASS
-row "Disable app for user" "pm disable-user --user $USER_ID $PKG" "$rc" "$before → $after ($disable_out)" \
+row "Disable app for user" "cmd package disable-user --user $USER_ID $PKG" "$rc" "$before → $after ($disable_out)" \
   "\`pm enable --user $USER_ID\` (exit $inv_rc)" "$restored" "$verdict" ""
 x pm disable-user --user "$USER_ID" "$PKG"
-x pm default-state --user "$USER_ID" "$PKG"
+x cmd package default-state --user "$USER_ID" "$PKG"
 inv_rc=$RC
 default_out="$(oneline "$OUT $ERR")"
 restored="$(disabled)"

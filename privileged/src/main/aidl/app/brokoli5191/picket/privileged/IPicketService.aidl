@@ -36,4 +36,19 @@ interface IPicketService {
 
     /** Reply<Long>: proportional set size of one process in kB (expensive, on demand only). */
     byte[] pss(int pid) = 8;
+
+    /**
+     * Reply<ActionPlan> for a JSON-encoded Action: the exact command, the state it replaces and the
+     * inverse. Nothing is changed. Refused for protected packages when the action is disruptive.
+     */
+    byte[] planAction(in byte[] action) = 9;
+
+    /** Reply<ActionPlan> for disabling one accessibility service while keeping all others enabled. */
+    byte[] planDisableAccessibility(String packageName, int userId, String component) = 10;
+
+    /**
+     * Reply<ActionOutcome>: runs a previously returned plan. The service rebuilds the command from the
+     * action, compares it and re-reads the state; a mismatch refuses to run.
+     */
+    byte[] executePlan(in byte[] plan) = 11;
 }

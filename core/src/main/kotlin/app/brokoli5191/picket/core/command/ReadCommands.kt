@@ -83,6 +83,25 @@ object ReadCommands {
 
     fun secure(key: SecureKey) = ShellCommand.of(SETTINGS, "get", "secure", key.key)
 
+    fun secureForUser(
+        key: SecureKey,
+        userId: Int,
+    ) = ShellCommand.of(SETTINGS, "--user", Validators.requireUserId(userId).toString(), "get", "secure", key.key)
+
+    fun appOp(
+        packageName: String,
+        userId: Int,
+        op: String,
+    ) = ShellCommand.of(
+        CMD,
+        "appops",
+        "get",
+        "--user",
+        Validators.requireUserId(userId).toString(),
+        Validators.requirePackageName(packageName),
+        requireOp(op),
+    )
+
     fun appOpsHolders(op: String) = ShellCommand.of(CMD, "appops", "query-op", requireOp(op), "allow")
 
     fun roleHolders(
