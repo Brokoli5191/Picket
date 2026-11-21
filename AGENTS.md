@@ -66,6 +66,10 @@ Long Gradle runs: start them in the background and poll. `org.gradle.jvmargs=-Xm
 ## Git and releases
 
 - Conventional Commits in English; one PR per topic, labelled `feature`, `fix` or `maintenance`.
+- No AI attribution anywhere: no `Co-Authored-By` or `Claude-Session` trailers in commit messages,
+  no "Generated with …" footers in PR descriptions, issues or comments. Commits are authored and
+  committed as `Brokoli5191 <119419930+Brokoli5191@users.noreply.github.com>` (set
+  `git config user.name` / `user.email` in the clone before the first commit).
 - Cloud sessions cannot push tags or delete branches. Releases are created by
   `.github/workflows/release.yml` (dispatch with a version input); it creates the tag itself.
   Do not modify that workflow's logic.
