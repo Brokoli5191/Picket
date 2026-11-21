@@ -43,4 +43,157 @@
     <string name="sort_name">Name</string>
     <string name="sort_uptime">Uptime</string>
     <string name="debug_sampling_cost">Sample: %1$.1f ms round trip, %2$.1f ms service CPU, %3$.1f KB, files read: %4$d</string>
+
+    <!-- Shared -->
+    <string name="separator" translatable="false">" · "</string>
+    <string name="error_title">Could not load this</string>
+    <string name="unknown">Unknown</string>
+    <string name="action_back">Back</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_expand">Show processes</string>
+    <string name="action_collapse">Hide processes</string>
+
+    <!-- Navigation -->
+    <string name="nav_processes">Processes</string>
+    <string name="nav_watchers">Watchers</string>
+    <string name="nav_wakeups">Wakeups</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Importance -->
+    <string name="importance_system">System</string>
+    <string name="importance_foreground">Foreground</string>
+    <string name="importance_visible">Visible</string>
+    <string name="importance_perceptible">Perceptible</string>
+    <string name="importance_service">Service</string>
+    <string name="importance_cached">Cached</string>
+    <string name="importance_unknown">Importance unknown</string>
+
+    <!-- Watchers -->
+    <string name="watchers_title">Who\'s reading along?</string>
+    <plurals name="watchers_count">
+        <item quantity="one">%1$d privileged hook</item>
+        <item quantity="other">%1$d privileged hooks</item>
+    </plurals>
+    <string name="watchers_intro">Apps listed here hold a hook that lets them see or control more than a normal app. Tap one to see everything else it does.</string>
+    <string name="watchers_partial_title">Some sources failed</string>
+    <string name="watchers_partial_body">These could not be read on this device: %1$s. The rest of the list is complete.</string>
+    <string name="watcher_sideloaded">Sideloaded</string>
+    <string name="watcher_inactive">granted, not active</string>
+    <string name="watcher_notifications">Notification access</string>
+    <string name="watcher_notifications_explain">Can read every notification as it arrives: message previews, one-time codes, who is calling. Can also dismiss notifications and press their buttons.</string>
+    <string name="watcher_accessibility">Accessibility services</string>
+    <string name="watcher_accessibility_explain">Can read what is on screen, including what you type, and can tap, swipe and type on your behalf. The most powerful hook an app can get without root.</string>
+    <string name="watcher_admin">Device admin</string>
+    <string name="watcher_admin_explain">Can enforce policies such as screen locks or wiping the device, and cannot be uninstalled while active.</string>
+    <string name="watcher_ime">Keyboards</string>
+    <string name="watcher_ime_explain">Every enabled keyboard can be switched to, and the current one sees everything you type except in password fields that block it.</string>
+    <string name="watcher_usage">Usage access</string>
+    <string name="watcher_usage_explain">Can see which apps you use, when and for how long.</string>
+    <string name="watcher_overlay">Draw over other apps</string>
+    <string name="watcher_overlay_explain">Can show windows on top of other apps, which is also how tapjacking and fake login screens work.</string>
+    <string name="watcher_vpn">VPN</string>
+    <string name="watcher_vpn_explain">All network traffic passes through this app while its VPN is active.</string>
+    <string name="watcher_roles">Default apps</string>
+    <string name="watcher_roles_explain">Holders of default roles get extra rights: the SMS app reads all messages, the dialer handles calls, the assistant can see the screen when invoked, the home app sees what you launch.</string>
+    <string name="watcher_dnd">Do Not Disturb access</string>
+    <string name="watcher_dnd_explain">Can change Do Not Disturb rules and see which notifications get through.</string>
+
+    <!-- Wakeups -->
+    <string name="wakeups_title">Wakeups</string>
+    <string name="wakeups_subtitle">Who woke the device in the last %1$d h</string>
+    <string name="wakeups_window">%1$d h</string>
+    <string name="wakeups_note_title">About these numbers</string>
+    <string name="wakeups_top">Top offenders since the last charge</string>
+    <string name="wakeups_note_since">Totals count since the last full charge (%1$s). The timeline shows what Android still remembers with a time: alarm deliveries of roughly the last hour, the last delivery of each alarm, and recent job runs.</string>
+    <string name="wakeups_note_unknown">Battery statistics were not available, so totals count since the last reboot. The timeline shows alarm deliveries of roughly the last hour and recent job runs.</string>
+    <string name="wakeups_counts">Alarms %1$d · wakelocks %2$d (%3$s) · jobs %4$d</string>
+    <string name="wakeups_empty">Nothing woke the device in this window.</string>
+
+    <!-- App detail -->
+    <string name="detail_watchers">Privileged hooks</string>
+    <string name="detail_processes">Processes</string>
+    <string name="detail_no_processes">Not running right now.</string>
+    <string name="detail_services">Running services</string>
+    <string name="detail_no_services">No running services.</string>
+    <string name="detail_power">Battery</string>
+    <string name="detail_standby_bucket">Standby bucket</string>
+    <string name="detail_battery_exemption">Battery optimisation</string>
+    <string name="exemption_user">Exempt (by the user)</string>
+    <string name="exemption_system">Exempt (by the system)</string>
+    <string name="exemption_none">Optimised</string>
+    <string name="detail_permissions">Granted runtime permissions</string>
+    <string name="detail_no_permissions">None.</string>
+    <string name="detail_appops">App-ops changed from default</string>
+    <string name="detail_wakeups">Wakeups</string>
+    <string name="detail_wakeups_24h">Last 24 hours</string>
+    <string name="detail_uid">%1$s (uid %2$d)</string>
+    <string name="detail_installer">Installed by %1$s</string>
+    <string name="installer_preinstalled">the system (preinstalled)</string>
+    <string name="installer_unknown">an unknown source</string>
+    <string name="service_started">started</string>
+    <string name="service_bound">bound</string>
+    <string name="service_foreground">foreground</string>
+
+    <!-- Settings -->
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_section_general">General</string>
+    <string name="settings_section_sampling">Process sampling</string>
+    <string name="settings_seconds">%1$d s</string>
+    <string name="settings_show_system">Show system processes by default</string>
+    <string name="settings_show_system_summary">Kernel threads, native daemons and preinstalled apps.</string>
+    <string name="settings_debug_overlay">Show sampling cost</string>
+    <string name="settings_debug_overlay_summary">Round trip, helper CPU time and payload size of each sample.</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_appearance_summary">Theme, colours, contrast, motion, haptics</string>
+    <string name="settings_how_it_works">How Picket works</string>
+    <string name="settings_how_it_works_summary">Shizuku, the helper process, and why there is no internet permission</string>
+    <string name="settings_licenses">Licences</string>
+    <string name="settings_licenses_summary">Open-source code inside this app</string>
+    <string name="settings_github">Source code</string>
+    <string name="settings_github_summary">github.com/Brokoli5191/Picket</string>
+
+    <!-- Appearance -->
+    <string name="appearance_preview">Preview</string>
+    <string name="appearance_preview_primary">Force stop</string>
+    <string name="appearance_preview_secondary">Undo</string>
+    <string name="appearance_preview_body">Changes apply immediately.</string>
+    <string name="appearance_theme">Theme</string>
+    <string name="appearance_theme_system">System</string>
+    <string name="appearance_theme_light">Light</string>
+    <string name="appearance_theme_dark">Dark</string>
+    <string name="appearance_pure_black">Pure black</string>
+    <string name="appearance_pure_black_summary">True black backgrounds in dark mode, for OLED screens.</string>
+    <string name="appearance_colour">Colour</string>
+    <string name="appearance_dynamic">Dynamic colour</string>
+    <string name="appearance_dynamic_summary">Colours from your wallpaper.</string>
+    <string name="appearance_style_tonal">Tonal</string>
+    <string name="appearance_style_vibrant">Vibrant</string>
+    <string name="appearance_style_expressive">Expressive</string>
+    <string name="appearance_style_fidelity">Fidelity</string>
+    <string name="appearance_contrast">Contrast</string>
+    <string name="appearance_follow_system">System</string>
+    <string name="appearance_contrast_standard">Standard</string>
+    <string name="appearance_contrast_medium">Medium</string>
+    <string name="appearance_contrast_high">High</string>
+    <string name="appearance_motion">Motion</string>
+    <string name="appearance_motion_full">Full</string>
+    <string name="appearance_motion_reduced">Reduced</string>
+    <string name="appearance_motion_off">Off</string>
+    <string name="appearance_haptics">Haptic feedback</string>
+    <string name="appearance_haptics_summary">Subtle confirmations for toggles and actions. Never while scrolling.</string>
+
+    <!-- How it works -->
+    <string name="how_shizuku_title">Shizuku</string>
+    <string name="how_shizuku_body">Android does not let normal apps see other apps\' processes or privileged settings. Shizuku runs a small server with the rights of the adb shell (or root, if you use Sui) and lends them to apps you approve.</string>
+    <string name="how_helper_title">The helper process</string>
+    <string name="how_helper_body">Picket asks Shizuku to start a helper, \"app.brokoli5191.picket:privileged\", which runs with those rights. It stops when Picket stops and only answers Picket.</string>
+    <string name="how_typed_title">No shell, only fixed operations</string>
+    <string name="how_typed_body">The helper cannot run arbitrary commands. It knows a fixed list of operations, checks every package and component name it receives, and runs each command as a list of arguments, never through a shell. Before any change you see the exact command line.</string>
+    <string name="how_offline_title">No internet permission</string>
+    <string name="how_offline_body">A tool with shell rights should not be able to send data anywhere. Picket does not request the internet permission, and its build fails if anything tries to add it.</string>
+    <string name="how_reboot_title">After a reboot</string>
+    <string name="how_reboot_body">Shizuku does not survive a restart. Start it again from the Shizuku app; with wireless debugging you may need to pair again.</string>
+    <string name="how_restricted_title">Restricted settings (Android 13+)</string>
+    <string name="how_restricted_body">Android blocks sideloaded apps from getting notification or accessibility access through Settings. When Picket undoes a revocation it restores that access through the shell, which works even then.</string>
+    <string name="licenses_intro">Picket is free software under the GNU GPL v3 or later. It includes the following open-source components:</string>
 </resources>
